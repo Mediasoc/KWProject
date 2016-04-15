@@ -95,7 +95,7 @@ public class IODetector extends ContextDetector {
 };
 
 // get WiFi information
-public void onWifiChanged(){
+public void getWifiInfo(){
 	while(true){
 		wifiManager.startScan();
 		
@@ -129,6 +129,7 @@ public void onWifiChanged(){
 			iocontext=0;
 		
 		return iocontext;
+		
 	}
 	
 	
