@@ -1,15 +1,24 @@
 package com.example.NLSUbiPos.context;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 
+
+import android.content.Context;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
+import android.hardware.SensorManager;
 import android.location.GpsSatellite;
 import android.location.GpsStatus;
+import android.location.Location;
+import android.location.LocationListener;
 import android.location.LocationManager;
 import android.net.wifi.ScanResult;
 import android.net.wifi.WifiManager;
+import android.os.Bundle;
+import android.os.Message;
 import android.util.Log;
 
 //the class to detect the user is indoor or outdoor
@@ -28,117 +37,167 @@ public class IODetector extends ContextDetector {
 	private double maxSNR;
 	
 	//the number of WiFi aps 
-	private int WifiN;
+	private int wifiN;
 	
 	//the standard deviation of wifi rssi
-	private double std;
+	private double wifistd;
 	
 	//the average of rssi
-	private double E;
+	private double wifimean;
 	
-	//the strength of light
-	private float light;
-	
-	//0 means indoor and 1 means outdoor
+	//0 represents indoor and 1 represents outdoor
 	private int iocontext; 
 	
 	//register the locationManager
-	private LocationManager locationManager;
+	LocationManager locationManager;
 	
-	//register the wifiManager
-    private WifiManager wifiManager;
+	//the object of LightAdmin and WifiAdmin
+    LightAdmin la; 
+    WifiAdmin wa;
+//    GPSAdmin ga;
+    
+//    private Thread th;
+
+    LocationListener locationListener;
+    
+//    private Sensor sensorlight; 
+    
+//    private SensorManager sensorManager;
+    
+//    private WifiManager wifiManager;
+        
+    private boolean Stopped=true;
+    
+	private boolean Started=false;
 	
-	//the Constructor of this class
-	public IODetector(){
-		GPSN=0;
-		GPSSNR=0;
-		GPSOK=false;
-		maxSNR=0;
-		WifiN=0;
-		std=0;
-		E=0;
-		light=0;
-		iocontext=0;
+	//the Constructor of this class, initialization of LightAdmin, WifiAdmin
+	public IODetector(Context context){
+		la=new LightAdmin(context);
+		wa=new WifiAdmin(context);
+		locationManager=(LocationManager)context.getSystemService(Context.LOCATION_SERVICE);
+		locationManager.addGpsStatusListener(listener);
 	}
 	
-	// when GPS status changes, get the GPS information
-	public void onGpsStatusChanged(int event) {
-		 switch (event) {
-	 case GpsStatus.GPS_EVENT_FIRST_FIX:
-         break;
-     case GpsStatus.GPS_EVENT_SATELLITE_STATUS:
-         GpsStatus gpsStatus=locationManager.getGpsStatus(null);
-         int maxSatellites = gpsStatus.getMaxSatellites();
-         Iterator<GpsSatellite> iters = gpsStatus.getSatellites().iterator();     
-         int count = 0;
-          E=0;
-         while (iters.hasNext() && count <= maxSatellites) {     
-             GpsSatellite s = iters.next();
-             if(s.usedInFix()){
-             E+=s.getSnr();
-             count++;    } 
-             if (s.getSnr() > maxSNR){
-	        		   maxSNR = (int) s.getSnr();
-	        	   }  
-         }   
-         if (count==0) GPSSNR=0;
-         else GPSSNR=E/count;
-         GPSN=count;
-         GPSOK=true;
-         break;
-     case GpsStatus.GPS_EVENT_STARTED:
-         break;
-     case GpsStatus.GPS_EVENT_STOPPED:
-         break;
-     }
+//	
+	GpsStatus.Listener listener = new GpsStatus.Listener() {
+		@Override
+		public void onGpsStatusChanged(int event) {
+            switch (event) {
+            case GpsStatus.GPS_EVENT_FIRST_FIX:
+                break;
+            case GpsStatus.GPS_EVENT_SATELLITE_STATUS:
+                GpsStatus gpsStatus=locationManager.getGpsStatus(null);
+                int maxSatellites = gpsStatus.getMaxSatellites();
+                Iterator<GpsSatellite> iters = gpsStatus.getSatellites().iterator();
+                double E=0;
+                int count = 0;
+                while (iters.hasNext() && count <= maxSatellites) {     
+                    GpsSatellite s = iters.next();
+                    if(s.usedInFix()){
+                    E+=s.getSnr();
+                    count++;    } 
+                    if (s.getSnr() > maxSNR){
+		        		   maxSNR = (int) s.getSnr();
+		        			
+		        	   }   
+                }   
+                if (count==0) GPSSNR=0;
+                else GPSSNR=E/count;
+                GPSN=count;
+                System.out.println("Satelite N:"+count+", SNR:"+GPSSNR);
+                GPSOK=true;
+                
+                break;
+            case GpsStatus.GPS_EVENT_STARTED:
+                break;
+            case GpsStatus.GPS_EVENT_STOPPED:
+                break;
+            }
+		}
+	};
 	
-};
-
-// get WiFi information
-public void getWifiInfo(){
-	while(true){
-		wifiManager.startScan();
+	
+	public void start() {
+		Started=true;
+//		sensorManager=la.mSensorManager;
+//		sensorlight=la.sensorlight;
+//		wifiManager=wa.mWifiManager;
+			wa.WifiScanLock();
+			while(true){			
+				wa.StartScan();
+				try {
+					Thread.sleep(1000);
+					if (!Started) {
+						Stopped=true;
+						locationManager.removeUpdates(locationListener);
+						return;
+					}
+					List<ScanResult> wifiList = wa.GetWifiList();
+					wifiN=wa.GetWifiNumber();
+					wifimean=wa.GetWifiMean();
+					wifistd=wa.GetWifiStd();
+					iocontext=GetIOcontext();
+//					System.out.println(wifimean);
+				
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}
+			}
+		}
 		
-			String r;
-			List<ScanResult> wifiList = wifiManager.getScanResults();
-			 WifiN=wifiList.size();
-			double E2=0,E=0;
-			for (ScanResult sr:wifiList){
-				E2+=sr.level*sr.level;
-				E+=sr.level;
-			}
-			if (WifiN>0){
-				E2/=WifiN; E/=WifiN;
-				E=E*-1;
-			}
-			 std=Math.sqrt(E2-E*E);
-			 
+	public void stop(){
+		if (!Started) return;
+		Started=false;
+		la.mSensorManager.unregisterListener(this);
 	}
-}
-
-// get indoor and outdoor from wifi/gps/light
-	public int getIOcontext(){
-		if(light>1500)
-			iocontext=1;
+	
+	
+	
+	public int GetIOcontext(){
+		if(la.GetLight()>1000)
+		   {
+			iocontext=0; 
+			}
 		else if (GPSSNR<16||maxSNR<28||GPSN<6)
-			iocontext=0;
-		else if (WifiN*0.11+E*-0.07524+std*-0.12+GPSN*-0.59+GPSSNR*-0.14>-9.82)
-
-			iocontext=0;	
+		   {iocontext=1;}
+		else if (wifiN*0.11+wifimean*-0.07524+wifistd*-0.12+GPSN*-0.59+GPSSNR*-0.14>-9.82)
+		   {
+			iocontext=1;
+			}
 		else
-			iocontext=0;
-		
-		return iocontext;
+		{ iocontext=0;}
+	    return iocontext;	
+	   
 		
 	}
+
+//	public int GetIOcontext(){
+//		if(la.GetLight()>1000)
+//		   {
+//			iocontext=0; 
+//			}
+//		else if (GPSSNR<16||maxSNR<28||GPSN<6)
+//		   {iocontext=1;}
+//		else if (wifiN*0.11+wifimean*-0.07524+wifistd*-0.12+GPSN*-0.59+GPSSNR*-0.14>-9.82)
+//		   {
+//			iocontext=1;
+//			}
+//		else
+//		{ iocontext=0;}
+//		System.out.println(maxSNR);
+//	    return iocontext;	
+//	   
+//		
+//	}
 	
 	
 	@Override
 	public void onSensorChanged(SensorEvent event) {
 		synchronized (this) {
 			if (event.sensor.getType() == Sensor.TYPE_LIGHT) {
-				light=event.values[0];
-				getIOcontext();
+				la.onSensorChanged(event);
+				//la.SetLight( event.values[0]);
+				
 			}
 		}
 		
