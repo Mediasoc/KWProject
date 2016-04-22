@@ -55,14 +55,9 @@ public class IOtest extends Activity implements SensorEventListener{
 			public void onClick(View v) {
 		     sensorManager.registerListener(IOtest.this, sensorlight, SensorManager.SENSOR_DELAY_GAME);
 				th=new Thread(new indoordetect());
-	     		th.start();
-//	     		context=id.GetIOcontext();
-//				testtext.append(id.GetIOcontext()+"\n");
-	     	    
+	     		th.start();	     	    
 	     		handler.postDelayed(runnable, 2000);
-				start.setEnabled(false);
-				
-				 
+				start.setEnabled(false);			 
 			}
 		});
 		
@@ -97,19 +92,17 @@ public class IOtest extends Activity implements SensorEventListener{
 		}
 	};
 	
-	
+	// update message per 2 seconds
 	Handler handler=new Handler();  
 	Runnable runnable=new Runnable() {  
 	    @Override  
 	    public void run() {  
 	        // TODO Auto-generated method stub  
-	        //要做的事情  
 	    	testtext.append(id.GetIOcontext()+"\n");
 	        handler.postDelayed(this, 2000);  
 	    }  
 	};  
-	
-	
+		
 	
 	
     class indoordetect implements Runnable{

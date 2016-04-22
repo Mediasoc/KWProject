@@ -24,9 +24,10 @@ public abstract class ContextDetector implements SensorEventListener{
 	}
 	
 	//notify all the listeners registered that a context event has occourred
-	public void notifyContextEvent(ContextEvent event){
+//	public void notifyContextEvent(ContextEvent event){
+	public void notifyContextEvent(int context){
 		for(OnContextListener listener:OnContextListeners){
-			listener.onContext(event);
+			listener.onContext(context);
 		}
 	}
 	

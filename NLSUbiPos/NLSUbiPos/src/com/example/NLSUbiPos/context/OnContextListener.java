@@ -6,5 +6,7 @@ package com.example.NLSUbiPos.context;
  */
 public interface  OnContextListener {
 	
- public void onContext(ContextEvent event);
+// public void onContext(ContextEvent event);
+	public void onContext(int context);
+	
 }

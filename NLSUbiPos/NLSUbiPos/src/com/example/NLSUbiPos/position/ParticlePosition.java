@@ -132,7 +132,8 @@ public class ParticlePosition extends Position{
 	}
 
 	@Override
-	public void onContext(ContextEvent event) {
+//	public void onContext(ContextEvent event) {
+	public void onContext(int context) {
 		// TODO Auto-generated method stub
 		
 	}

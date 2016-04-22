@@ -30,9 +30,6 @@ public class IODetector extends ContextDetector {
 	//the mean SNR of the GPS signal
 	private double GPSSNR;
 	
-	//check the GPS is OK or not
-	private boolean GPSOK;
-	
 	//the maximum SNR of GPS signal
 	private double maxSNR;
 	
@@ -54,22 +51,10 @@ public class IODetector extends ContextDetector {
 	//the object of LightAdmin and WifiAdmin
     LightAdmin la; 
     WifiAdmin wa;
-//    GPSAdmin ga;
     
-//    private Thread th;
-
-    LocationListener locationListener;
+    //Used for receiving notifications from the LocationManager when the location has changed.
+//    LocationListener locationListener;
     
-//    private Sensor sensorlight; 
-    
-//    private SensorManager sensorManager;
-    
-//    private WifiManager wifiManager;
-        
-    private boolean Stopped=true;
-    
-	private boolean Started=false;
-	
 	//the Constructor of this class, initialization of LightAdmin, WifiAdmin
 	public IODetector(Context context){
 		la=new LightAdmin(context);
@@ -78,7 +63,7 @@ public class IODetector extends ContextDetector {
 		locationManager.addGpsStatusListener(listener);
 	}
 	
-//	
+//	This listener is used for receiving notifications when GPS status has changed.
 	GpsStatus.Listener listener = new GpsStatus.Listener() {
 		@Override
 		public void onGpsStatusChanged(int event) {
@@ -97,16 +82,15 @@ public class IODetector extends ContextDetector {
                     E+=s.getSnr();
                     count++;    } 
                     if (s.getSnr() > maxSNR){
-		        		   maxSNR = (int) s.getSnr();
-		        			
+		        		   maxSNR = (int) s.getSnr();	
 		        	   }   
+                    System.out.println(maxSNR);
                 }   
                 if (count==0) GPSSNR=0;
                 else GPSSNR=E/count;
                 GPSN=count;
-                System.out.println("Satelite N:"+count+", SNR:"+GPSSNR);
-                GPSOK=true;
-                
+//                System.out.println("Satelite N:"+count+", SNR:"+GPSSNR);
+         
                 break;
             case GpsStatus.GPS_EVENT_STARTED:
                 break;
@@ -116,43 +100,36 @@ public class IODetector extends ContextDetector {
 		}
 	};
 	
-	
+// Start the WiFi scanning and get the iocontext
 	public void start() {
-		Started=true;
-//		sensorManager=la.mSensorManager;
-//		sensorlight=la.sensorlight;
-//		wifiManager=wa.mWifiManager;
+	      
 			wa.WifiScanLock();
 			while(true){			
 				wa.StartScan();
 				try {
 					Thread.sleep(1000);
-					if (!Started) {
-						Stopped=true;
-						locationManager.removeUpdates(locationListener);
-						return;
-					}
 					List<ScanResult> wifiList = wa.GetWifiList();
 					wifiN=wa.GetWifiNumber();
 					wifimean=wa.GetWifiMean();
 					wifistd=wa.GetWifiStd();
 					iocontext=GetIOcontext();
-//					System.out.println(wifimean);
+					notifyContextEvent(iocontext);
 				
 				} catch (InterruptedException e) {
 					e.printStackTrace();
 				}
 			}
 		}
-		
+	
 	public void stop(){
-		if (!Started) return;
-		Started=false;
 		la.mSensorManager.unregisterListener(this);
+		wa.mWifiManager.setWifiEnabled(false);
+//		locationManager.removeUpdates(locationListener);
+		
 	}
 	
 	
-	
+	// return the context of indoor or outdoor,0 means outdoor and 1 means indoor
 	public int GetIOcontext(){
 		if(la.GetLight()>1000)
 		   {
@@ -166,29 +143,9 @@ public class IODetector extends ContextDetector {
 			}
 		else
 		{ iocontext=0;}
-	    return iocontext;	
-	   
-		
+	    return iocontext;		
 	}
 
-//	public int GetIOcontext(){
-//		if(la.GetLight()>1000)
-//		   {
-//			iocontext=0; 
-//			}
-//		else if (GPSSNR<16||maxSNR<28||GPSN<6)
-//		   {iocontext=1;}
-//		else if (wifiN*0.11+wifimean*-0.07524+wifistd*-0.12+GPSN*-0.59+GPSSNR*-0.14>-9.82)
-//		   {
-//			iocontext=1;
-//			}
-//		else
-//		{ iocontext=0;}
-//		System.out.println(maxSNR);
-//	    return iocontext;	
-//	   
-//		
-//	}
 	
 	
 	@Override
