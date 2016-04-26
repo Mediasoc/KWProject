@@ -39,9 +39,10 @@
         </activity> -->
     
         
-        <activity
-            android:name="com.example.NLSUbiPos.context.IOtest"
-            android:label="室内外检测" >
+       
+ <activity
+            android:name="com.example.NLSUbiPos.context.MotionTestActivity"
+            android:label="运动识别" >
              <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
