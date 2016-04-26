@@ -12,10 +12,10 @@ public class PressureFloorDetector extends FloorDetector {
 	private float currentpressure;
 	
 	// the size of pressure data
-	public int pressureSize;
+	private int pressureSize;
 	
 	// an arraylist that stores pressure data
-	ArrayList<Float> pressureList;
+	public ArrayList<Float> pressureList;
 	
 	// the number of  floor
 	private int floornum;
@@ -41,7 +41,9 @@ public class PressureFloorDetector extends FloorDetector {
 	public void processPressureEvent(SensorEvent event){
 		pressureData[pressureSize] = event.values[0];
 		 currentpressure=event.values[0];
+		 if(pressureList.size()<10){
 		 pressureList.add(event.values[0]);
+		 }
 		 pressureSize++;
 	}
 	
@@ -52,9 +54,15 @@ public class PressureFloorDetector extends FloorDetector {
 	}
 	
 	
+	//get the pressure size
+	public int getpresize(){
+		return pressureSize;
+	}
+	
 	//return floor number
 	public int getFloor() {
-	    int a=(int) ((currentpressure-pressureList.get(3))/0.42);
+		pressureSize=0;
+		int a=(int) ((currentpressure-pressureList.get(3))/0.4);
 		floornum=initialfloor-a;
 		return floornum;
 	}
@@ -64,8 +72,7 @@ public class PressureFloorDetector extends FloorDetector {
 		synchronized (this) {
 			if (event.sensor.getType() == Sensor.TYPE_PRESSURE) {
 				processPressureEvent(event);
-					//	long timeStamp = event.timestamp;
-					//	notifyFloorEvent(floor);
+					
 			}
 		}
 		
@@ -73,7 +80,7 @@ public class PressureFloorDetector extends FloorDetector {
 
 	@Override
 	public void onAccuracyChanged(Sensor sensor, int accuracy) {
-		// TODO 鑷姩鐢熸垚鐨勬柟娉曞瓨鏍?
+		// TODO
 		
 	}
 

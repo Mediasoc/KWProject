@@ -112,8 +112,8 @@ public class IODetector extends ContextDetector {
 					wifiN=wa.GetWifiNumber();
 					wifimean=wa.GetWifiMean();
 					wifistd=wa.GetWifiStd();
-					iocontext=GetIOcontext();
-					notifyContextEvent(iocontext);
+//					iocontext=GetIOcontext();
+//					notifyContextEvent(iocontext);
 				
 				} catch (InterruptedException e) {
 					e.printStackTrace();

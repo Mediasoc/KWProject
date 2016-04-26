@@ -103,27 +103,23 @@ public class FloorActivity extends Activity implements SensorEventListener{
 
 	private void updateMessage() {
 		
-		pfd.pressureSize=0;
+//		pfd.pressureSize=0;
 		Calendar now = Calendar.getInstance();
 		String time = "" + now.get(Calendar.YEAR) + ":" + (now.get(Calendar.MONTH)+1) + ":" + now.get(Calendar.DAY_OF_MONTH) + 
 				":" + now.get(Calendar.HOUR_OF_DAY) + ":" + now.get(Calendar.MINUTE) + ":" + now.get(Calendar.SECOND);
 	     
 		int floornum=pfd.getFloor();
-	    if(floornum!=0&&floornum!=-1)
 	    showText.append(time+"->Floornum="+floornum+"\n");
-	    else if(floornum==0)
-	    showText.append(time+"->stairs or elevator\n");
-	    else{
-	    showText.setText(time+"->the initial floornum is false\n");	
-	    this.onPause();
-	    }
+//	    this.onPause();
+	    
 
 	}
 
 	@Override
 	public void onSensorChanged(SensorEvent event) {
 		pfd.onSensorChanged(event);
-		if(pfd.pressureSize>=50 ) {
+//		System.out.println(pfd.pressureSize);
+		if(pfd.getpresize()>=50 ) {
 			updateMessage();
 			pfd.notifyFloorEvent(pfd.getFloor());
 		}

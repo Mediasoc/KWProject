@@ -122,7 +122,6 @@ public class IOtest extends Activity implements SensorEventListener{
 	public void onSensorChanged(SensorEvent event) {
 		switch(event.sensor.getType()) {
 		case Sensor.TYPE_LIGHT:
-//			System.out.println(event.values[0]);
 			lightsize++;
 			id.onSensorChanged(event);
 			break;	

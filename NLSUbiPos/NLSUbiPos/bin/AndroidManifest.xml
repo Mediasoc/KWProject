@@ -36,11 +36,21 @@
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-        </activity> -->
+        </activity>
+     -->
+        <activity
+            android:name="com.example.NLSUbiPos.context.ContextDetectActivity"
+            android:label="情境识别" >
+             <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
     
         
        
- <activity
+ <!-- <activity
             android:name="com.example.NLSUbiPos.context.MotionTestActivity"
             android:label="运动识别" >
              <intent-filter>
@@ -48,7 +58,7 @@
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-        </activity> 
+        </activity>  -->
         
     <!--     <service android:name="com.example.NLSUbiPos.context.IODetectorServive" >
 </service> -->
