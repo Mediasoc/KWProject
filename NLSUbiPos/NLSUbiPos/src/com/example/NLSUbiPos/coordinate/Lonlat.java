@@ -1,10 +1,10 @@
 package com.example.NLSUbiPos.coordinate;
 
 import com.example.NLSUbiPos.coordinate.Mercator;
-
+// Edited by Liu on 20160513
 public class Lonlat {
-	public double lon=0;
-	public double lat=0;
+	private double lon=0;
+	private double lat=0;
 	
 	public Lonlat(double llon,double llat)
 	{
@@ -18,6 +18,14 @@ public class Lonlat {
 	
 	public double getlat(){
 		return lat;
+	}
+	
+	public void setlon(double lon){
+		this.lon = lon;
+	}
+	
+	public void setlat(double lat){
+		this.lat = lat;
 	}
 	
 	public Mercator lonlattomercator(){

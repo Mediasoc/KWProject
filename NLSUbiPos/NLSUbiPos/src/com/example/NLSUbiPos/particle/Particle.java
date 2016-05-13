@@ -62,6 +62,11 @@ public class Particle implements Cloneable{
 		this.floor = particle.floor;
 	}
 	
+	public void inheritPosition(Particle particle){
+		this.xCoordinate = particle.xCoordinate;
+		this.yCoordinate = particle.yCoordinate;
+	}
+	
 	public void motionConfigure(double stepLength){
 		switch(this.motion){
 		case walking:

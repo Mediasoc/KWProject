@@ -7,10 +7,13 @@ import java.util.Set;
 
 import com.example.NLSUbiPos.building.Building;
 import com.example.NLSUbiPos.context.ContextEvent;
+import com.example.NLSUbiPos.coordinate.Mercator;
 import com.example.NLSUbiPos.geometry.Line2d;
 import com.example.NLSUbiPos.particle.Particle;
 import com.example.NLSUbiPos.stepdetecor.StepEvent;
 import com.example.NLSUbiPos.utils.NormalDistribution;
+
+import android.location.Location;
 
 /**
  * added by LiuDonghui on 20160415
@@ -41,7 +44,7 @@ public class ParticlePosition extends Position{
 	
 	private double headingSpread = Math.PI * 45 /180;
 	
-	private double stepLengthSpread = 0.1;
+	private double stepLengthSpread = 0.2;
 	
 	private double positionSpread = 0.7;
 	
@@ -51,13 +54,21 @@ public class ParticlePosition extends Position{
 	
 	private Building building;
 	
-	private static final int DEFAULT_PARTICLE_COUNT = 1000;
+	private static final int DEFAULT_PARTICLE_COUNT = 2000;
 	
 	private boolean STEP_CALI = true;
 	
 	private boolean HEADING_CALI = true;
 	
 	private double headingBias = 0.0;
+	
+	private boolean GPSAssistance = false;
+	
+	private int GPSCredibility = 3;
+	
+	private float GPSAccuracy = 2;
+	
+	private double GPSBearing = 0;
 	
 	private Collection<Line2d> workingSet = new HashSet<Line2d>();
 	
@@ -97,13 +108,25 @@ public class ParticlePosition extends Position{
 		stepCount++;
 		stepLength = event.getStepLength();
 		for(Particle particle : particles){
-			particle.motionConfigure(stepLength);
+//			particle.motionConfigure(stepLength);
+			particle.setStepLength(stepLength + stepLengthSpread * NormalDistribution.randn());
 		}
 		HashSet<Particle> livedParticles = new HashSet<Particle>(particles.size());
 		HashSet<Particle> deadParticles = new HashSet<Particle>(particles.size());
 		boolean particleLive;
 		for(Particle particle : particles){
-			particleLive = updateParticle(particle, heading);
+			if(GPSAssistance){
+				if(GPSCredibility > 8){
+					particle.setXCoordinate(CurrentGPSLocation.getX());
+					particle.setYCoordinate(CurrentGPSLocation.getY());
+					particleLive = true;
+				}else{
+					particleLive = updateParticle(particle, heading) && GPSAssisted(particle, CurrentGPSLocation, GPSAccuracy * 2);
+				}
+			}else{
+				particleLive = updateParticle(particle, heading);
+			}
+			
 			//TODO add wifiAssisted and gpsAssisted functions
 			if(particleLive){
 				livedParticles.add(particle);
@@ -114,6 +137,15 @@ public class ParticlePosition extends Position{
 		particles = livedParticles;
 		if(particles.size() == 0){
 			//TODO add wifiAssisted and gpsAssisted functions
+			if(GPSAssistance){
+				if(GPSCredibility < 8){
+					setPosition((positionX + GPSCredibility * CurrentGPSLocation.getX())/(1 + GPSCredibility),(positionY + GPSCredibility * CurrentGPSLocation.getY())/(1 + GPSCredibility),floor);
+				}else{
+					setPosition(CurrentGPSLocation.getX(), CurrentGPSLocation.getY(),floor);
+				}
+			}else{
+				setPosition(positionX, positionY, floor);
+			}
 			setPosition(positionX, positionY, floor);
 		}else if(particles.size() < 1 * numberOfParticles){
 			resample(deadParticles);
@@ -129,6 +161,13 @@ public class ParticlePosition extends Position{
 		}else{
 			this.heading = heading;
 		}		
+		if(GPSAssistance){
+			if(GPSCredibility < 8){
+				this.heading = (this.heading + GPSCredibility * GPSBearing)/(1 + GPSCredibility);
+			}else{
+				this.heading = GPSBearing;
+			}
+		}
 	}
 
 	@Override
@@ -192,8 +231,18 @@ public class ParticlePosition extends Position{
 					newParticles.add(particle);
 				}
 			}else{
-				length = stepLength + stepLengthSpread * NormalDistribution.randn();
-				newParticles.add(Particle.circleNormalDistribution(positionX, positionY, floor, positionSpread, heading, headingSpread, length, particle.getID()));
+//				length = stepLength + stepLengthSpread * NormalDistribution.randn();
+//				newParticles.add(Particle.circleNormalDistribution(positionX, positionY, floor, positionSpread, heading, headingSpread, length, particle.getID()));
+				if(iter.hasNext()){
+					livedParticle = iter.next();
+					particle.inheritPosition(livedParticle);
+					newParticles.add(particle);
+				}else{
+					iter = particles.iterator();
+					livedParticle = iter.next();
+					particle.inheritPosition(livedParticle);
+					newParticles.add(particle);
+				}
 			}
 		}
 		particles.addAll(newParticles);
@@ -215,6 +264,29 @@ public class ParticlePosition extends Position{
 			headingBias += particle.getHeadingBias();
 		}
 		headingBias /= particles.size();
+	}
+
+	@Override
+	public void onGPSPosition(Location location) {
+		// TODO Auto-generated method stub
+		
+	}
+	
+	private boolean GPSAssisted(Particle particle, Mercator GPS, float accuracy){
+		double dist = Math.sqrt((particle.getXCoordinate() - GPS.getX()) * (particle.getXCoordinate() - GPS.getX()) + (particle.getYCoordinate() - GPS.getY()) * (particle.getYCoordinate() - GPS.getY()));
+		if(dist > accuracy){
+			return false;
+		}else{
+			return true;
+		}
+	}
+	
+	public void setGPSAssistance(boolean flag){
+		this.GPSAssistance = flag;
+	}
+	
+	public void setGPSCredibility(int credit){
+		this.GPSCredibility = credit;
 	}
 
 
