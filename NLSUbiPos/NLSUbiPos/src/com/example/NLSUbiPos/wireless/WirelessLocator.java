@@ -6,10 +6,12 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.regex.Pattern;
 
+import com.example.NLSUbiPos.wireless.PositionProb;
 import com.example.NLSUbiPos.coordinate.Mercator;
 
 import android.annotation.SuppressLint;
@@ -58,7 +60,7 @@ public abstract class WirelessLocator {
 		accessPointAddress = new ArrayList<String>();
 		accessPointCoordinate = new ArrayList<Mercator>();
 		onWirelessPositionListeners = new ArrayList<OnWirelessPositionListener>();
-		readAccessPoint(pathname);
+		
 	}
 	
 	/**
@@ -83,9 +85,9 @@ public abstract class WirelessLocator {
 	 * It invokes all the callback methods in the registered listeners. 
 	 * @param coordinate the coordinate of the access point which accords with some conditions
 	 */
-	public void notifyWirelessPosition(Mercator mercator) {
+	public void notifyWirelessPosition(List<PositionProb> list) {
 		for (OnWirelessPositionListener listener : onWirelessPositionListeners) {
-			listener.onWirelessPosition(mercator);
+			listener.onWirelessPosition(list);
 		}
 	}
 	
@@ -93,39 +95,7 @@ public abstract class WirelessLocator {
 	 * Reads the known wireless access points information including ID, MAC, position and so on.
 	 * @param pathname the pathname of the file which stores the access points information
 	 */
-	private void readAccessPoint(String pathname) {
-		File file = new File(pathname);
-		if (!file.isAbsolute()) {
-			file = new File(Environment.getExternalStorageDirectory(), pathname);
-		}
-		BufferedReader bufferedReader = null;
-		try {
-			bufferedReader = new BufferedReader(new FileReader(file));
-			Pattern pattern = Pattern.compile(" +");
-			String line = "";
-			while ((line=bufferedReader.readLine()) != null) {
-				line = line.trim();
-				if (line.isEmpty()) {
-					break;
-				}
-				if (!line.startsWith("#")) {
-					String[] info = pattern.split(line);
-					Mercator apCoordinate = new Mercator(
-							Double.parseDouble(info[2]), Double.parseDouble(info[3]));
-					accessPointAddress.add(info[1]);
-					accessPointCoordinate.add(apCoordinate);
-				}
-			}
-			
-			bufferedReader.close();
-		} catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-	}
+	
 	
 	
 	/**

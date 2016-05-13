@@ -3,6 +3,7 @@ package com.example.NLSUbiPos.position;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Set;
 
 import com.example.NLSUbiPos.building.Building;
@@ -12,6 +13,7 @@ import com.example.NLSUbiPos.geometry.Line2d;
 import com.example.NLSUbiPos.particle.Particle;
 import com.example.NLSUbiPos.stepdetecor.StepEvent;
 import com.example.NLSUbiPos.utils.NormalDistribution;
+import com.example.NLSUbiPos.wireless.PositionProb;
 
 import android.location.Location;
 
@@ -287,6 +289,12 @@ public class ParticlePosition extends Position{
 	
 	public void setGPSCredibility(int credit){
 		this.GPSCredibility = credit;
+	}
+
+	@Override
+	public void onWirelessPosition(List<PositionProb> list) {
+		// TODO 自动生成的方法存根
+		
 	}
 
 

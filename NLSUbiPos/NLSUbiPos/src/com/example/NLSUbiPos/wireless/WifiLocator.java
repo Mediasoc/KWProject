@@ -1,8 +1,18 @@
 package com.example.NLSUbiPos.wireless;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
+
+import com.example.NLSUbiPos.coordinate.Mercator;
+
+
 
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -10,8 +20,8 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.net.wifi.ScanResult;
 import android.net.wifi.WifiManager;
+import android.os.Environment;
 import android.util.Log;
-import android.widget.Toast;
 
 /**
  * The wireless locator using WiFi signals.
@@ -19,71 +29,103 @@ import android.widget.Toast;
 public class WifiLocator extends WirelessLocator {
 	
 	// manages the WiFi function
-	private WifiManager wifiManager;
+	private WifiManager wifimanager;
+	//location
+	public  Mercator CurrentLocation=new Mercator(0,0);
 	
 	// the received WiFi list by scanning
-	private List<ScanResult> scanResults;
+	private List<ScanResult> scanresults;
+	
+	//the WiFi signal database
+	public static List<databaseRecord> database=new ArrayList<databaseRecord>();
+	
+	private static boolean IsDatabaseInitialized=false;
+	
+	
+	//record the input wifi signal
+	public  List<inputRecord> record=new ArrayList<inputRecord>();
+	
+	static int CurrentUserIndex=0;
+	
+	RssMacList rssmaclist=new RssMacList();
+	public List<PositionProb> PositionProbList;
+	
+	public  PositionInfo PositionInfoTmp = new PositionInfo();
 
 	/**
 	 * Constructs a WiFi locator.
-	 * @param context the application context
-	 * @param the pathname of the file storing the WiFi access points information
+	 * 
 	 */
 	public WifiLocator(Context context, String pathname) {
 		super(context, pathname);
-		// gets the WiFi manager
-		wifiManager = (WifiManager) context.getSystemService(Context.WIFI_SERVICE);
-		// opens WiFi if it is not enabled
-		if (!wifiManager.isWifiEnabled()) {
-			if (wifiManager.getWifiState() != WifiManager.WIFI_STATE_ENABLING) {
-				wifiManager.setWifiEnabled(true);
+		wifimanager=(WifiManager)context.getSystemService(context.WIFI_SERVICE);
+		
+		if (!wifimanager.isWifiEnabled()) {
+			if (wifimanager.getWifiState() != WifiManager.WIFI_STATE_ENABLING) {
+				wifimanager.setWifiEnabled(true);
 			}
 		}
-		
-		// registers the WiFi results receiver
-		context.registerReceiver(new BroadcastReceiver() {
-
-			@Override
-			public void onReceive(Context context, Intent intent) {
-				// gets the scan results
-				scanResults = wifiManager.getScanResults();
-				// find the strongest BLE access point
-				int index = -1;
-				int maxRssi = -100000000;
-				for (int i=0; i<scanResults.size(); i++) {
-					if (accessPointAddress.contains(scanResults.get(i).BSSID)) {
-						if (scanResults.get(i).level >= maxRssi) {
-							maxRssi = scanResults.get(i).level;
-							index = accessPointAddress.indexOf(scanResults.get(i).BSSID);
-							Log.d("wwww",""+scanResults.get(i).BSSID);
-						}
-					}
-					Log.d("qqqq",""+scanResults.get(i).BSSID);
-				}
-				for (int i=0; i<accessPointAddress.size(); i++) {
+		//initialize the database
+		readDataBase(pathname);
+		//register wifi receiver
+		context.registerReceiver(new BroadcastReceiver(){
+			
+			public void onReceive(Context context,Intent intent){
+				if(IsDatabaseInitialized){
 					
-					Log.d("wwww",""+accessPointAddress.get(i));
+					scanresults=wifimanager.getScanResults();
+					
+					if( scanresults!=null){
+					
+					ReceivedData receiveddata=new ReceivedData();
+					receiveddata.timestamp=System.currentTimeMillis();
+					String Macaddr=wifimanager.getConnectionInfo().getMacAddress();
+					receiveddata.userID=Long.parseLong(Macaddr.replace(":",""), 16);
+					
+					for(ScanResult scanresult:scanresults){
+						receiveddata.macAddrList.add(Long.parseLong(scanresult.BSSID.replace(":", ""), 16));
+						receiveddata.RSSiList.add((double)scanresult.level);
 						
-				}
-				Toast.makeText(context, "size:"+scanResults.size()+" "+"rssi:"+maxRssi, Toast.LENGTH_SHORT).show();;
-				// the strongest access point
-				if (index>=0 && maxRssi>=-40 && times>=0) {
-					// release the message
-					notifyWirelessPosition(accessPointCoordinate.get(index));
-					// executes the scanning for the specified times
-					if (times == 1) {
-						times = -1;
-						stopLocating();
-					} else if (times != 0) {
-						times--;
 					}
-				}
+					
+					//positioning algorithm
+					if(receiveddata!=null){
+						
+				    	  CurrentUserIndex=InternalRecordUpdate(receiveddata);
+				    	  rssmaclist=AverageRssByTime(CurrentUserIndex,100);
+				    	  rssmaclist=SortByMac(rssmaclist);
+				    	  rssmaclist=removeExtraMac(receiveddata,rssmaclist);
+				    	  
+				    	  
+				    	  PositionProbList=getPositionProbList(rssmaclist);
+				    	  
+				    	  sortPositionProbList();
+				    	 
+				    	 PositionProbList=PositionCounting(3);
+				    	  PositionInfoTmp = WKNN(3);
+				    	  if(PositionInfoTmp!=null){
+				    		  System.out.println(1);
+				    	  // CurrentLocation.=PositionInfoTmp.x;
+				    	  // CurrentLocation.y=PositionInfoTmp.y;
+				    	   notifyWirelessPosition(PositionProbList);
+				    	  //System.out.println(CurrentLocation.x);
+				    	  }
+				    	   
+				    	  
+				      }
+					}
+					
+					}
+					 
+					
 			}
 			
+			
 		}, new IntentFilter(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION));
+		
+		     
 	}
-
-	@Override
+	
 	public void startLocating(long interval, int times) {
 		this.times = times;
 		// gets the timer object
@@ -94,7 +136,10 @@ public class WifiLocator extends WirelessLocator {
 			@Override
 			public void run() {
 				// starts the WiFi scanning
-				wifiManager.startScan();
+				wifimanager.startScan();
+				
+				 
+				
 			}
 		};
 		
@@ -102,4 +147,488 @@ public class WifiLocator extends WirelessLocator {
 		timer.schedule(timerTask, 0, interval);
 	}
 	
+	public void stopLocating() {
+		if (timer != null) {
+			// cancels the scanning task
+			timer.cancel();
+			timer = null;
+		}
+	}
+
+	private void readDataBase(String pathname){
+		File file=new File(pathname);
+		if (!file.isAbsolute()) {
+			file = new File(Environment.getExternalStorageDirectory(), pathname);
+		}
+		
+		 if (!file.exists())
+		    {
+		    	Log.e("error", "dbFileNotFound");
+		    	return ;
+		    }
+		 
+		 BufferedReader bufferedreader=null;
+		 
+		 try{
+			 bufferedreader=new BufferedReader(new FileReader(file));
+		 } catch (FileNotFoundException e) {
+				// TODO Auto-generated catch block
+		    	Log.e("error", "dbFileNotFound");
+		    	return ;
+			}
+		 
+		 String parameterString;
+			databaseRecord DatabaseRecordTmp = null;
+			PositionInfo PositionInfoTmp = null;
+			List<Double> DoubleListTmp = null;
+			boolean isPositionFound = false;
+			try {
+
+				while ((parameterString = bufferedreader.readLine()) != null) {
+					String[] StringArray = parameterString.split(",");
+					
+					DatabaseRecordTmp = new databaseRecord();
+					PositionInfoTmp = new PositionInfo();
+					
+					PositionInfoTmp.x = Double.parseDouble(StringArray[1]);
+					PositionInfoTmp.y = Double.parseDouble(StringArray[2]);
+					PositionInfoTmp.z = Double.parseDouble(StringArray[3]);
+					PositionInfoTmp.o = Double.parseDouble(StringArray[4]);
+					DatabaseRecordTmp.aPositionInfo = PositionInfoTmp;
+
+					isPositionFound = false;
+					int PositionIndex;
+					for( PositionIndex = 0 ; PositionIndex< database.size();PositionIndex++){
+					
+						if(database.get(PositionIndex).aPositionInfo.o == PositionInfoTmp.o && database.get(PositionIndex).aPositionInfo.x == PositionInfoTmp.x && database.get(PositionIndex).aPositionInfo.y == PositionInfoTmp.y && database.get(PositionIndex).aPositionInfo.z == PositionInfoTmp.z )
+						{	
+							//already have this point
+							isPositionFound = true;
+							break;
+						}
+					}
+					
+					if(!isPositionFound)
+					{
+						database.add(DatabaseRecordTmp);
+					}
+					
+					database.get(PositionIndex).macAddrList.add(Long.parseLong(StringArray[5]));
+					
+					
+					DoubleListTmp = new ArrayList<Double>();
+					for(int i = 6;i<StringArray.length;i++)
+					{
+						if(i%2 != 0){
+						
+						DoubleListTmp.add(Double.parseDouble(StringArray[i]));
+						}
+					}
+					
+				
+					
+					database.get(PositionIndex).RssiListList.add(DoubleListTmp);
+					IsDatabaseInitialized=true;
+				}
+				
+				bufferedreader.close();
+				
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}	
+	}
+	
+	
+	// return current user index
+		int InternalRecordUpdate(ReceivedData rvPtr) {
+
+			int UserIndex = 0;
+			boolean check = false;
+			
+			//check the user exist or not
+			for (UserIndex = 0; UserIndex < record.size(); UserIndex++) {
+				if (rvPtr.userID.equals(record.get(UserIndex).UserId)) {
+					check = true;
+					break;
+				}
+			}
+			
+			if (!check) {
+				
+				//have not this user
+				
+				inputRecord inputRecordTmp = new inputRecord();
+				inputRecordTmp.UserId = rvPtr.userID;
+				
+				if(rvPtr.macAddrList.size() != 0){
+					inputRecordTmp.macList.addAll(rvPtr.macAddrList);
+				}
+				
+				inputRecordPerTime inputRecordPerTimeTmp = new inputRecordPerTime();
+				inputRecordPerTimeTmp.timeStamp = rvPtr.timestamp;
+				
+				
+				if(rvPtr.RSSiList.size() != 0){
+					inputRecordPerTimeTmp.RssValueList.addAll(rvPtr.RSSiList);
+				}
+				
+				inputRecordTmp.inputRecordPerTimeList.add(inputRecordPerTimeTmp);
+				
+				record.add(inputRecordTmp);
+				
+			} else {
+				
+				//already have this user
+				
+				if(record.get(UserIndex).inputRecordPerTimeList.size() >= 10)
+				{
+					//remove first record at index = 0
+					record.get(UserIndex).inputRecordPerTimeList.remove(0);
+					
+				}else
+				{
+					// just add
+				}
+				
+				inputRecordPerTime inputRecordPerTimeTmp = new inputRecordPerTime();
+				inputRecordPerTimeTmp.timeStamp = rvPtr.timestamp;
+				
+				List<Double> RSSiListTmp = new ArrayList<Double>();
+				for(int i = 0;i < record.get(UserIndex).macList.size();i++)
+				{
+					//init result with -120
+					RSSiListTmp.add((double) -120);
+				}
+		
+				if(RSSiListTmp.size() != 0){
+				inputRecordPerTimeTmp.RssValueList.addAll(RSSiListTmp);
+				}
+				
+				int rvMacAddrIndex;
+				int recordMacAddrIndex;
+				for(rvMacAddrIndex = 0;rvMacAddrIndex < rvPtr.macAddrList.size();rvMacAddrIndex++)
+				{
+					recordMacAddrIndex = record.get(UserIndex).macList.indexOf(rvPtr.macAddrList.get(rvMacAddrIndex));
+					if(recordMacAddrIndex == -1)
+					{
+						// add new macAddr
+						record.get(UserIndex).macList.add(rvPtr.macAddrList.get(rvMacAddrIndex));
+						// add new to inputRecordPerTime
+						inputRecordPerTimeTmp.RssValueList.add((double)-120);
+						// add result to former data with -120
+						for(int i = 0;i < record.get(UserIndex).inputRecordPerTimeList.size();i++)
+						{
+							record.get(UserIndex).inputRecordPerTimeList.get(i).RssValueList.add((double) -120);
+						}
+					}
+					//try again
+					recordMacAddrIndex = record.get(UserIndex).macList.indexOf(rvPtr.macAddrList.get(rvMacAddrIndex));
+					inputRecordPerTimeTmp.RssValueList.set(recordMacAddrIndex, rvPtr.RSSiList.get(rvMacAddrIndex));
+				}			
+				record.get(UserIndex).inputRecordPerTimeList.add(inputRecordPerTimeTmp);
+			}
+			// end function
+			return UserIndex;
+		}
+		
+		
+		// sort RssMacList by descend
+		private RssMacList SortByMac(RssMacList aRssMacList) {
+
+			for (int SortIndex = 0; SortIndex < aRssMacList.macList.size(); SortIndex++) {
+
+				for (int i = SortIndex + 1; i < aRssMacList.macList.size(); i++) {
+					if (aRssMacList.RssValueList.get(SortIndex) < aRssMacList.RssValueList
+							.get(i)) {
+						Long macTmp = aRssMacList.macList.get(SortIndex);
+						Double rssiTmp = aRssMacList.RssValueList.get(SortIndex);
+
+						aRssMacList.macList.set(SortIndex,
+								aRssMacList.macList.get(i));
+						aRssMacList.RssValueList.set(SortIndex,
+								aRssMacList.RssValueList.get(i));
+
+						aRssMacList.macList.set(i, macTmp);
+						aRssMacList.RssValueList.set(i, rssiTmp);
+					}
+				}
+			}
+			return aRssMacList;
+		}
+		
+		private RssMacList removeExtraMac(ReceivedData rvPtr, RssMacList aRssMacList) {
+			
+			RssMacList RssMacListTmp = new RssMacList();
+
+			for(int i = 0;i < aRssMacList.macList.size();i++)
+			{
+				if(rvPtr.macAddrList.contains(aRssMacList.macList.get(i)))
+				{
+					RssMacListTmp.macList.add(aRssMacList.macList.get(i));
+					RssMacListTmp.RssValueList.add(aRssMacList.RssValueList.get(i));
+				}
+			}
+			
+			return RssMacListTmp;
+		}
+		
+		// return a RssList
+		RssMacList AverageRssByTime(int UserIndex, int averageRssWeight)
+		{
+			int AverageRssWeight = averageRssWeight;
+			
+			RssMacList outputPtr = new RssMacList();
+
+			if(record.get(UserIndex).macList.size() != 0){
+			outputPtr.macList.addAll(record.get(UserIndex).macList);
+			}
+			
+			List<Double> RssListTmp = new ArrayList<Double>();
+
+			//init counter = 0 : save the count of each macAddr
+			List<Integer> CounterList = new ArrayList<Integer>();
+			for(int i = 0; i < record.get(UserIndex).macList.size();i++)
+			{
+				CounterList.add(0);
+			}
+			
+			int TimeIndex = 0;
+			
+			for (TimeIndex = 0; TimeIndex < record.get(UserIndex).inputRecordPerTimeList
+					.size(); TimeIndex++) {
+
+				if(TimeIndex == 0)
+				{
+					if(record.get(UserIndex).inputRecordPerTimeList.get(TimeIndex).RssValueList.size() != 0){
+					RssListTmp.addAll(record.get(UserIndex).inputRecordPerTimeList.get(TimeIndex).RssValueList);
+					}
+					
+					for(int i = 0; i < record.get(UserIndex).macList.size();i++)
+					{
+
+						if(!record.get(UserIndex).inputRecordPerTimeList.get(TimeIndex).RssValueList.get(i).equals((double)-120))
+						{
+							CounterList.set(i, 1);
+						}
+						else
+						{
+							RssListTmp.set(i, (double) 0);
+							//ignore -120
+						}
+						//RssListTmp.add(record.get(UserIndex).inputRecordPerTimeList.get(TimeIndex).RssValueList.get(i));
+					}
+					
+				}else
+				{
+					if(TimeIndex != record.get(UserIndex).inputRecordPerTimeList.size() - 1){
+						for(int macIndex = 0; macIndex < RssListTmp.size(); macIndex++ )
+						{
+							if(!record.get(UserIndex).inputRecordPerTimeList.get(TimeIndex).RssValueList.get(macIndex).equals((double)-120))
+							{
+								RssListTmp.set(macIndex, RssListTmp.get(macIndex) + record.get(UserIndex).inputRecordPerTimeList.get(TimeIndex).RssValueList.get(macIndex));
+								CounterList.set(macIndex, CounterList.get(macIndex) + 1);
+							}else
+							{
+								// = -120 ignore
+							}
+						}
+					}else
+					{
+						// add weight to last rv
+						for(int macIndex = 0; macIndex < RssListTmp.size(); macIndex++ )
+						{
+							if(!record.get(UserIndex).inputRecordPerTimeList.get(TimeIndex).RssValueList.get(macIndex).equals((double)-120))
+							{
+								RssListTmp.set(macIndex, RssListTmp.get(macIndex) + averageRssWeight*record.get(UserIndex).inputRecordPerTimeList.get(TimeIndex).RssValueList.get(macIndex));
+								CounterList.set(macIndex, CounterList.get(macIndex) + averageRssWeight);
+							}else
+							{
+								// = -120 ignore
+							}
+						}
+					}
+				}
+			}
+			
+			for(int macIndex = 0; macIndex < RssListTmp.size(); macIndex++ )
+			{
+				if(CounterList.get(macIndex) != 0)
+				{	
+					RssListTmp.set(macIndex, RssListTmp.get(macIndex)/CounterList.get(macIndex));
+				}
+				else
+				{
+					// should not have this situation
+					RssListTmp.set(macIndex, (double) -120);
+				}
+			}
+			
+			if(RssListTmp.size() != 0){
+			outputPtr.RssValueList.addAll(RssListTmp);
+			}
+			
+			return outputPtr;
+		}
+		
+		List<PositionProb> getPositionProbList(RssMacList aRssMacList)
+		{
+			List<PositionProb> PositionProbList = new ArrayList<PositionProb>();
+			PositionProb PositionProbTmp;
+			
+			int PositionIndex;
+			// for debug algorithem
+			List<Double> probList;
+			for(PositionIndex = 0; PositionIndex < database.size();PositionIndex++)
+			{
+				PositionProbTmp = new PositionProb();
+				PositionProbTmp.aPositionInfo = database.get(PositionIndex).aPositionInfo;
+				
+				//probList = new ArrayList<Double>();
+				
+				int RvMacAddrIndex;
+				for(RvMacAddrIndex = 0;RvMacAddrIndex < aRssMacList.macList.size();RvMacAddrIndex++)
+				{
+					int DbMacAddrIndex = database.get(PositionIndex).macAddrList.indexOf(aRssMacList.macList.get(RvMacAddrIndex));
+					
+					if(DbMacAddrIndex != -1)
+					{
+
+						double originValue = aRssMacList.RssValueList.get(RvMacAddrIndex);
+						
+						if(originValue > -30)
+						{
+							originValue = -30;
+						}else if(originValue <= -90)
+						{
+							originValue = -89;
+						}
+						
+						int lowerValue =  (int) originValue - 1;
+						int higherValue = (int) originValue;
+						int indexOfLowerValue = lowerValue +90;
+						int indexOfhigherValue = higherValue+90;
+						
+						double probTmp;
+						
+						probTmp =
+								(higherValue - originValue)*database.get(PositionIndex).RssiListList.get(DbMacAddrIndex).get(indexOfLowerValue)
+							+	(originValue - lowerValue)*database.get(PositionIndex).RssiListList.get(DbMacAddrIndex).get(indexOfhigherValue);
+
+						//probList.add(probTmp);
+						
+						PositionProbTmp.prob =  probTmp*PositionProbTmp.prob;
+						
+					}else
+					{
+						//do not contains mac, so prob set to 0;
+						//PositionProbTmp.prob = 0;
+						//break;
+					}
+				}
+				if(PositionProbTmp.prob!=1){
+					
+				PositionProbList.add(PositionProbTmp);
+				}else
+				{
+					PositionProbTmp.prob=0;
+					PositionProbList.add(PositionProbTmp);
+				}
+			}
+			return PositionProbList;
+		}
+		
+		void sortPositionProbList() {
+			
+			PositionProb PositionProbTmp = null;
+			
+			for (int SortIndex = 0; SortIndex < PositionProbList.size(); SortIndex++) {
+
+				for (int i = SortIndex + 1; i < PositionProbList.size(); i++) {
+					if (PositionProbList.get(SortIndex).prob < PositionProbList.get(i).prob) {
+						
+						PositionProbTmp = PositionProbList.get(SortIndex);
+						
+						PositionProbList.set(SortIndex, PositionProbList.get(i));
+						PositionProbList.set(i, PositionProbTmp);
+					}
+				}
+			}
+			
+}
+		
+		PositionInfo WKNN(int KnnNumber)
+		{
+			int knnNumber = KnnNumber;
+			
+			if(PositionProbList.size() == 0)
+			{System.out.println(2);
+				// error return PositionProbList==null
+				return null;
+				
+			}
+			
+			int PositionProbListIndex ;
+			PositionInfo PositionInfoTmp = new PositionInfo();
+			double probCount = 0; 
+			for(PositionProbListIndex = 0 ; PositionProbListIndex < PositionProbList.size() && PositionProbListIndex < knnNumber;PositionProbListIndex++)
+			{
+				probCount += PositionProbList.get(PositionProbListIndex).prob;
+				PositionInfoTmp.x += (PositionProbList.get(PositionProbListIndex).aPositionInfo.x)* PositionProbList.get(PositionProbListIndex).prob;
+				PositionInfoTmp.y += (PositionProbList.get(PositionProbListIndex).aPositionInfo.y)* PositionProbList.get(PositionProbListIndex).prob;
+				PositionInfoTmp.z += (PositionProbList.get(PositionProbListIndex).aPositionInfo.z)* PositionProbList.get(PositionProbListIndex).prob;
+				PositionInfoTmp.o += (PositionProbList.get(PositionProbListIndex).aPositionInfo.o)* PositionProbList.get(PositionProbListIndex).prob;
+			}
+			
+			if(probCount != 0)
+			{
+				PositionInfoTmp.x = PositionInfoTmp.x/probCount;
+				PositionInfoTmp.y = PositionInfoTmp.y/probCount;
+				PositionInfoTmp.z = PositionInfoTmp.z/probCount;
+				PositionInfoTmp.o = PositionInfoTmp.o/probCount;
+			}else
+			{System.out.println(3);
+				// error return probCount==0
+				return null;
+			}
+			
+			return PositionInfoTmp;
+		}
+		
+		List<PositionProb> PositionCounting(int Number){
+			int num=Number;
+			if(PositionProbList.size() == 0)
+			{System.out.println(2);
+				// error return PositionProbList==null
+				return null;
+				
+			}
+			List<PositionProb> PositionProbList=new ArrayList<PositionProb>();
+			PositionInfo PositionInfoTmp = new PositionInfo();
+			PositionProb PositionProbTmp=new PositionProb();
+			double probCount = 0;
+			int PositionProbListIndex ;
+			for(PositionProbListIndex = 0 ; PositionProbListIndex < PositionProbList.size() && PositionProbListIndex <num;PositionProbListIndex++)
+			{
+				probCount += PositionProbList.get(PositionProbListIndex).prob;
+				PositionInfoTmp.x = (PositionProbList.get(PositionProbListIndex).aPositionInfo.x);
+				PositionInfoTmp.y = (PositionProbList.get(PositionProbListIndex).aPositionInfo.y);
+				PositionInfoTmp.z = (PositionProbList.get(PositionProbListIndex).aPositionInfo.z);
+				PositionInfoTmp.o = (PositionProbList.get(PositionProbListIndex).aPositionInfo.o);
+				
+				PositionProbTmp.aPositionInfo=PositionInfoTmp;
+				PositionProbTmp.prob=PositionProbList.get(PositionProbListIndex).prob;
+				PositionProbList.add(PositionProbTmp);
+			}
+			
+			if(probCount!=0){
+				for(int i=0;i<num;i++){
+					PositionProbList.get(i).prob=PositionProbList.get(i).prob/probCount;
+				}
+			}else{
+				return null;
+			}
+			
+			return PositionProbList;
+		}
 }

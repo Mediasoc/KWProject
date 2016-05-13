@@ -33,10 +33,10 @@ OnWirelessPositionListener,OnGPSPositionListener {
 		}
 	}
 	
-	public void onWirelessPosition(Mercator mercator){
+	/*public void onWirelessPosition(Mercator mercator){
 		CurrentWiFiLocation.setX(mercator.getX());
 		CurrentWiFiLocation.setY(mercator.getY());
-	}
+	}*/
 /*	
 	public void onGPSPosition(Mercator mercator){
 		CurrentGPSLocation.x=mercator.x;
@@ -46,4 +46,5 @@ OnWirelessPositionListener,OnGPSPositionListener {
 	public void onFloor(int floornum){
 		floor=floornum;
 	}
+	
 }
