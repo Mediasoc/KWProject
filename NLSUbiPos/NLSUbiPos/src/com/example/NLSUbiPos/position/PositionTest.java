@@ -1,5 +1,7 @@
 package com.example.NLSUbiPos.position;
 
+import java.util.List;
+
 import com.example.NLSUbiPos.context.OnContextListener;
 import com.example.NLSUbiPos.coordinate.Mercator;
 import com.example.NLSUbiPos.floor.OnFloorListener;
@@ -9,6 +11,9 @@ import com.example.NLSUbiPos.satellite.OnGPSPositionListener;
 import com.example.NLSUbiPos.stepdetecor.OnStepListener;
 import com.example.NLSUbiPos.stepdetecor.StepEvent;
 import com.example.NLSUbiPos.wireless.OnWirelessPositionListener;
+import com.example.NLSUbiPos.wireless.PositionProb;
+
+import android.location.Location;
 
 public class PositionTest implements OnStepListener, OnHeadingChangeListener,OnFloorListener,OnContextListener,
 OnWirelessPositionListener,OnGPSPositionListener,OnMotionListener {
@@ -16,18 +21,7 @@ OnWirelessPositionListener,OnGPSPositionListener,OnMotionListener {
 	public int motion;
 	public int floor;
 	public int iocontext;
-	
-	@Override
-	public void onGPSPosition(Mercator mercator) {
-		// TODO 自动生成的方法存根
-		
-	}
 
-	@Override
-	public void onWirelessPosition(Mercator mercator) {
-		// TODO 自动生成的方法存根
-		
-	}
 
 	@Override
 	public void onContext(int context) {
@@ -58,6 +52,18 @@ OnWirelessPositionListener,OnGPSPositionListener,OnMotionListener {
 	public void onMotion(int motion) {
 		// TODO 自动生成的方法存根
 		this.motion=motion;
+	}
+
+	@Override
+	public void onGPSPosition(Location location) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void onWirelessPosition(List<PositionProb> list) {
+		// TODO Auto-generated method stub
+		
 	}
 
 }
