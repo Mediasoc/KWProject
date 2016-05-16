@@ -8,13 +8,13 @@ import java.util.Set;
 
 import com.example.NLSUbiPos.building.Building;
 import com.example.NLSUbiPos.context.ContextEvent;
+import com.example.NLSUbiPos.coordinate.Lonlat;
 import com.example.NLSUbiPos.coordinate.Mercator;
 import com.example.NLSUbiPos.geometry.Line2d;
 import com.example.NLSUbiPos.particle.Particle;
 import com.example.NLSUbiPos.stepdetecor.StepEvent;
 import com.example.NLSUbiPos.utils.NormalDistribution;
 import com.example.NLSUbiPos.wireless.PositionProb;
-
 import android.location.Location;
 
 /**
@@ -71,6 +71,8 @@ public class ParticlePosition extends Position{
 	private float GPSAccuracy = 2;
 	
 	private double GPSBearing = 0;
+	
+	public Lonlat CurrentLonlatLocation;
 	
 	private Collection<Line2d> workingSet = new HashSet<Line2d>();
 	
@@ -270,8 +272,18 @@ public class ParticlePosition extends Position{
 
 	@Override
 	public void onGPSPosition(Location location) {
-		// TODO Auto-generated method stub
-		
+    	CurrentLonlatLocation = new Lonlat(location.getLongitude(),location.getLatitude());
+    	//coordinate convert
+		CurrentGPSLocation = CurrentLonlatLocation.lonlattomercator();
+		if(location.hasAccuracy())
+			GPSAccuracy = location.getAccuracy();
+		else
+			GPSAccuracy = Integer.MAX_VALUE;
+		GPSCredibility = (int)(5/GPSAccuracy);
+		if(location.hasBearing())
+			GPSBearing = location.getBearing() * Math.PI / 180;
+		else
+			GPSBearing = heading;
 	}
 	
 	private boolean GPSAssisted(Particle particle, Mercator GPS, float accuracy){
