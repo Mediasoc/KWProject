@@ -14,6 +14,7 @@ import com.example.NLSUbiPos.geometry.Line2d;
 import com.example.NLSUbiPos.particle.Particle;
 import com.example.NLSUbiPos.stepdetecor.StepEvent;
 import com.example.NLSUbiPos.utils.NormalDistribution;
+import com.example.NLSUbiPos.wireless.PositionInfo;
 import com.example.NLSUbiPos.wireless.PositionProb;
 import android.location.Location;
 
@@ -66,6 +67,8 @@ public class ParticlePosition extends Position{
 	
 	private boolean GPSAssistance = false;
 	
+	private boolean WiFiAssistance = false;
+	
 	private int GPSCredibility = 3;
 	
 	private float GPSAccuracy = 2;
@@ -73,6 +76,8 @@ public class ParticlePosition extends Position{
 	private double GPSBearing = 0;
 	
 	public Lonlat CurrentLonlatLocation;
+	
+	private List<PositionProb> WiFiList;
 	
 	private Collection<Line2d> workingSet = new HashSet<Line2d>();
 	
@@ -90,19 +95,34 @@ public class ParticlePosition extends Position{
 		if(particles != null && particles.size() ==0){
 			while (number <= numberOfParticles){
 				length = 0.7 + stepLengthSpread * NormalDistribution.randn();
-				particles.add(Particle.singlePosition(xAverage, yAverage, floor, headingSpread, length, number));
+				particles.add(Particle.singlePosition(xAverage, yAverage, floor, headingSpread, 
+						length, number));
 				number++;
 			}
 			positionX = xAverage;
 			positionY = yAverage;
 		}else {
 			particles = new HashSet<Particle>(numberOfParticles);
-			while(number <= numberOfParticles){
-				length = 0.7 +stepLengthSpread * NormalDistribution.randn();
-				particles.add(Particle.circleNormalDistribution(xAverage, yAverage, floor, positionSpread, heading, headingSpread, length, number));
-				number++;
+			if(WiFiAssistance && WiFiList != null){
+				for(PositionProb positionProb : WiFiList){
+					while(number <= positionProb.prob * numberOfParticles){
+						length = 0.7 +stepLengthSpread * NormalDistribution.randn();				
+						particles.add(Particle.circleNormalDistribution(positionProb.aPositionInfo.x, 
+								positionProb.aPositionInfo.y, floor, positionSpread, heading, 
+								headingSpread, length, number));
+						number++;
+					}
+					number = 0;
+				}
+			}else{
+				while(number <= numberOfParticles){
+					length = 0.7 +stepLengthSpread * NormalDistribution.randn();				
+					particles.add(Particle.circleNormalDistribution(xAverage, yAverage, floor, 
+							positionSpread, heading, headingSpread, length, number));
+					number++;
+				}		
 			}
-			computeCloudAverage();
+			computeCloudAverage();			
 		}
 		
 	}
@@ -114,6 +134,7 @@ public class ParticlePosition extends Position{
 		for(Particle particle : particles){
 //			particle.motionConfigure(stepLength);
 			particle.setStepLength(stepLength + stepLengthSpread * NormalDistribution.randn());
+			particle.setWiFiLocation(findNearestAP(particle, WiFiList));
 		}
 		HashSet<Particle> livedParticles = new HashSet<Particle>(particles.size());
 		HashSet<Particle> deadParticles = new HashSet<Particle>(particles.size());
@@ -125,13 +146,15 @@ public class ParticlePosition extends Position{
 					particle.setYCoordinate(CurrentGPSLocation.getY());
 					particleLive = true;
 				}else{
-					particleLive = updateParticle(particle, heading) && GPSAssisted(particle, CurrentGPSLocation, GPSAccuracy * 2);
+					particleLive = updateParticle(particle, heading) && GPSAssisted(particle,
+							CurrentGPSLocation, GPSAccuracy * 2);
 				}
+			}
+			if(WiFiAssistance){
+				particleLive = updateParticle(particle, heading) && WiFiAssisted(particle);
 			}else{
 				particleLive = updateParticle(particle, heading);
 			}
-			
-			//TODO add wifiAssisted and gpsAssisted functions
 			if(particleLive){
 				livedParticles.add(particle);
 			}else{
@@ -140,17 +163,17 @@ public class ParticlePosition extends Position{
 		}
 		particles = livedParticles;
 		if(particles.size() == 0){
-			//TODO add wifiAssisted and gpsAssisted functions
 			if(GPSAssistance){
 				if(GPSCredibility < 8){
-					setPosition((positionX + GPSCredibility * CurrentGPSLocation.getX())/(1 + GPSCredibility),(positionY + GPSCredibility * CurrentGPSLocation.getY())/(1 + GPSCredibility),floor);
+					setPosition((positionX + GPSCredibility * CurrentGPSLocation.getX())/
+							(1 + GPSCredibility),(positionY + GPSCredibility * 
+									CurrentGPSLocation.getY()) / (1 + GPSCredibility),floor);
 				}else{
 					setPosition(CurrentGPSLocation.getX(), CurrentGPSLocation.getY(),floor);
 				}
 			}else{
 				setPosition(positionX, positionY, floor);
 			}
-			setPosition(positionX, positionY, floor);
 		}else if(particles.size() < 1 * numberOfParticles){
 			resample(deadParticles);
 		}
@@ -287,8 +310,23 @@ public class ParticlePosition extends Position{
 	}
 	
 	private boolean GPSAssisted(Particle particle, Mercator GPS, float accuracy){
-		double dist = Math.sqrt((particle.getXCoordinate() - GPS.getX()) * (particle.getXCoordinate() - GPS.getX()) + (particle.getYCoordinate() - GPS.getY()) * (particle.getYCoordinate() - GPS.getY()));
+		double dist = Math.sqrt((particle.getXCoordinate() - GPS.getX()) * 
+				(particle.getXCoordinate() - GPS.getX()) + 
+				(particle.getYCoordinate() - GPS.getY()) * 
+				(particle.getYCoordinate() - GPS.getY()));
 		if(dist > accuracy){
+			return false;
+		}else{
+			return true;
+		}
+	}
+	
+	private boolean WiFiAssisted(Particle particle){
+		double dist = Math.sqrt((particle.getXCoordinate() - particle.getWiFiLocation().x) * 
+				(particle.getXCoordinate() - particle.getWiFiLocation().x) + 
+				(particle.getYCoordinate() - particle.getWiFiLocation().y) * 
+				(particle.getYCoordinate() - particle.getWiFiLocation().y));
+		if(dist > 2){
 			return false;
 		}else{
 			return true;
@@ -305,10 +343,25 @@ public class ParticlePosition extends Position{
 
 	@Override
 	public void onWirelessPosition(List<PositionProb> list) {
-		// TODO 自动生成的方法存根
-		
+		WiFiList =list;		
 	}
 
+	private PositionInfo findNearestAP(Particle particle, List<PositionProb> list){
+		double dist = Integer.MAX_VALUE;
+		PositionInfo minDistAP = null;
+		double tempDist = 0;
+		for(PositionProb pos : list){
+			tempDist = Math.sqrt((particle.getXCoordinate() - pos.aPositionInfo.x) * 
+					(particle.getXCoordinate() - pos.aPositionInfo.x) + 
+					(particle.getYCoordinate() - pos.aPositionInfo.y) * 
+					(particle.getYCoordinate() - pos.aPositionInfo.y));
+			if(tempDist <= dist){
+				minDistAP = pos.aPositionInfo;
+				dist = tempDist;
+			}
+		}
+		return minDistAP;
+	}
 
 	
 }

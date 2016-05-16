@@ -5,6 +5,7 @@ import java.util.Random;
 import com.example.NLSUbiPos.position.ParticlePosition.Motion;
 import com.example.NLSUbiPos.position.ParticlePosition.State;
 import com.example.NLSUbiPos.utils.NormalDistribution;
+import com.example.NLSUbiPos.wireless.PositionInfo;
 
 public class Particle implements Cloneable{
 	
@@ -23,6 +24,8 @@ public class Particle implements Cloneable{
 	private Motion motion;
 	
 	private State state;
+	
+	private PositionInfo wifiPosition;
 	
 	public Particle(double xCoordinate, double yCoordinate, int floor, double bias, double stepLength, int ID){
 		this.xCoordinate = xCoordinate;
@@ -124,6 +127,10 @@ public class Particle implements Cloneable{
 		return ID;
 	}
 	
+	public PositionInfo getWiFiLocation(){
+		return wifiPosition;
+	}
+	
 	public void setXCoordinate(double x){
 		this.xCoordinate = x;
 	}
@@ -146,6 +153,10 @@ public class Particle implements Cloneable{
 	
 	public void setID(int id){
 		this.ID = id;
+	}
+	
+	public void setWiFiLocation(PositionInfo pos){
+		this.wifiPosition = pos;
 	}
 
 }
