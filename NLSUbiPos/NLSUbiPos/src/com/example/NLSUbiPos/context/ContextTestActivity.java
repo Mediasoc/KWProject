@@ -1,6 +1,8 @@
 package com.example.NLSUbiPos.context;
 import com.example.NLSUbiPos.floor.*;
 import com.example.NLSUbiPos.motion.SimpleMotionDetector;
+import com.example.NLSUbiPos.position.PositionClient;
+import com.example.NLSUbiPos.position.PositionTest;
 
 import java.util.Calendar;
 import com.example.fusionnavigation.R;
@@ -23,41 +25,31 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 
-//this is an activity which tests comprehensive contexts
-public class ContextDetectActivity extends Activity implements SensorEventListener{
-	private SensorManager sensorManager = null;
+//this is an activity which tests comprehensive contexts using listeners
+public class ContextTestActivity extends Activity  {
 	private Button startButton;
 	private Button stopButton;
 	private Button ExitButton;
 	private TextView showText;
 	private EditText floorText;
-	private PressureFloorDetector pfd;
-	private SimpleMotionDetector md;
-	private IODetector id;
-	private LocationManager locationManager;
 	private Thread th;
+	private PositionClient pc;
+	private PositionTest pt;
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_context);
 		//create new object of PressureFloorDetector, MotionDetector and IODetector
-		pfd=new PressureFloorDetector();
-		md=new SimpleMotionDetector();
-		id=new IODetector(this);
-		
-		//register the locationManager
-		locationManager=id.locationManager;
-		sensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
-		
-		//Definition of sensors
-		final Sensor pressure = sensorManager.getDefaultSensor(Sensor.TYPE_PRESSURE);
-		final Sensor gravity = sensorManager.getDefaultSensor(Sensor.TYPE_GRAVITY);
-		final Sensor linearacc = sensorManager.getDefaultSensor(Sensor.TYPE_LINEAR_ACCELERATION);
-		final Sensor sensorlight = id.la.mSensorManager.getDefaultSensor(Sensor.TYPE_LIGHT);
+		pc=new PositionClient(this);
+		pt=new PositionTest();
+		pc.getFloorDetector().addOnFloorListener(pt);
+		pc.getMotionDetector().addOnMotionListener(pt);
+		pc.getContextDetector().addOnContextListener(pt);
+	
 		
         //Register the LocationListener with the location manager service
-		locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER,500, 1,locationListener); 
+		pc.getContextDetector().locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER,500, 1,locationListener); 
 		
 		//The text printed to screen
 		showText = (TextView) findViewById(R.id.showText);
@@ -71,27 +63,28 @@ public class ContextDetectActivity extends Activity implements SensorEventListen
 		// The callback when StartButton is clicked
 		startButton.setOnClickListener(new OnClickListener(){
 			@SuppressLint("ShowToast") @Override
-		public void onClick(View v) {
-				
-		//Registers a SensorEventListener for the given sensor.
-			sensorManager.registerListener(ContextDetectActivity.this, pressure, SensorManager.SENSOR_DELAY_GAME);
-			sensorManager.registerListener(ContextDetectActivity.this, gravity, SensorManager.SENSOR_DELAY_GAME);
-			sensorManager.registerListener(ContextDetectActivity.this, linearacc, SensorManager.SENSOR_DELAY_GAME);
-			sensorManager.registerListener(ContextDetectActivity.this, sensorlight, SensorManager.SENSOR_DELAY_GAME);				startButton.setEnabled(false);
+		
+			public void onClick(View v) {	
+			pc.registerSensorListener();
+			startButton.setEnabled(false);
 			stopButton.setEnabled(true);
 			ExitButton.setEnabled(true);
 			
 			//Input the initial floor number
 			if(floorText.getText().toString().length()==0)
 			{
-			Toast.makeText(ContextDetectActivity.this, "请输入初始楼层", Toast.LENGTH_LONG).show();
+			Toast.makeText(ContextTestActivity.this, "请输入初始楼层", Toast.LENGTH_LONG).show();
 			}
 			else
-			pfd.setinifloor(Integer.parseInt(floorText.getText().toString()));
+			pc.getFloorDetector().setinifloor(Integer.parseInt(floorText.getText().toString()));
 			
 			//A new thread of IOdetect
 			th=new Thread(new indoordetect());
-	     	th.start();	     	 
+	     	th.start();	     
+	     	
+	     	//使用线程控制屏幕显示时间
+	     	Thread1 th1=new Thread1();
+	     	th1.start();
 			}
 		});
 		
@@ -101,8 +94,8 @@ public class ContextDetectActivity extends Activity implements SensorEventListen
 
 			@Override
 			public void onClick(View v) {
-				sensorManager.unregisterListener(ContextDetectActivity.this);
-				pfd.pressureList.clear();
+//				sensorManager.unregisterListener(ContextTestActivity.this);
+				pc.unregisterSensorListener();
 				startButton.setEnabled(true);
 				stopButton.setEnabled(false);
 				ExitButton.setEnabled(true);
@@ -114,7 +107,7 @@ public class ContextDetectActivity extends Activity implements SensorEventListen
 
 			@Override
 			public void onClick(View v) {
-				sensorManager.unregisterListener(ContextDetectActivity.this);
+				pc.unregisterSensorListener();
 				finish();
 			}
 		});
@@ -124,7 +117,7 @@ public class ContextDetectActivity extends Activity implements SensorEventListen
 	protected void onPause() {
 		// TODO Auto-generated method stub
 		super.onPause();
-		sensorManager.unregisterListener(ContextDetectActivity.this);
+		pc.unregisterSensorListener();
 		startButton.setEnabled(true);
 		stopButton.setEnabled(false);
 	}
@@ -162,10 +155,27 @@ public class ContextDetectActivity extends Activity implements SensorEventListen
 
 		@Override
 		public void run() {
-			id.start();	
+			pc.getContextDetector().start();	
 		}
     	
     }
+	
+	
+	//2s显示一次
+	class Thread1 extends Thread{
+		public void run(){
+			int i=0;
+			for(i=0;i<1000;i++){
+			try{
+				sleep(2000);
+				updateMessage();
+				}
+			catch(Exception e){
+			}
+			}
+		}
+	}
+	
 	
 	
 	//print the context information on the phone screen
@@ -174,9 +184,10 @@ public class ContextDetectActivity extends Activity implements SensorEventListen
 		Calendar now = Calendar.getInstance();
 		String time = "" + now.get(Calendar.YEAR) + ":" + (now.get(Calendar.MONTH)+1) + ":" + now.get(Calendar.DAY_OF_MONTH) + 
 				":" + now.get(Calendar.HOUR_OF_DAY) + ":" + now.get(Calendar.MINUTE) + ":" + now.get(Calendar.SECOND);
-		int s=md.getmotion(); 
-		int floornum=pfd.getFloor();
-		int iocontext=id.GetIOcontext();
+		int s=pt.motion;
+		int floornum=pt.floor;
+		int iocontext=pt.iocontext;
+
 		String r=null;
 		String t=null;
 		switch(s){
@@ -209,28 +220,10 @@ public class ContextDetectActivity extends Activity implements SensorEventListen
 		    break;
 		}
 		
+		System.out.println(t);
 	    showText.append(time+"\n"+"->"+t+"\n"+"->Floornum="+floornum+"\n"+"->"+r+"\n");	    
 
 	}
 
-	@Override
-	public void onSensorChanged(SensorEvent event) {
-		md.onSensorChanged(event);
-		pfd.onSensorChanged(event);
-		id.onSensorChanged(event);
-		//Call the updateMeaasge about per 2 seconds
-		if(pfd.getpresize()>=80&&md.getgraSize()>=100 && md.getLinaccSize()>=100 ) {
-			updateMessage();
-			pfd.notifyFloorEvent(pfd.getFloor());
-		}
-		
-		
-	}
 
-
-	@Override
-	public void onAccuracyChanged(Sensor sensor, int accuracy) {
-		// TODO
-		
-	}
 }

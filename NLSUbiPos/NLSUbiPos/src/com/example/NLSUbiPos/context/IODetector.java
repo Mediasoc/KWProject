@@ -84,7 +84,7 @@ public class IODetector extends ContextDetector {
                     if (s.getSnr() > maxSNR){
 		        		   maxSNR = (int) s.getSnr();	
 		        	   }   
-                    System.out.println(maxSNR);
+//                    System.out.println(maxSNR);
                 }   
                 if (count==0) GPSSNR=0;
                 else GPSSNR=E/count;
@@ -102,7 +102,6 @@ public class IODetector extends ContextDetector {
 	
 // Start the WiFi scanning and get the iocontext
 	public void start() {
-	      
 			wa.WifiScanLock();
 			while(true){			
 				wa.StartScan();
@@ -113,8 +112,8 @@ public class IODetector extends ContextDetector {
 					wifimean=wa.GetWifiMean();
 					wifistd=wa.GetWifiStd();
 //					iocontext=GetIOcontext();
-//					notifyContextEvent(iocontext);
-				
+					notifyContextEvent(GetIOcontext());
+//					 System.out.println(GetIOcontext());
 				} catch (InterruptedException e) {
 					e.printStackTrace();
 				}
@@ -130,13 +129,17 @@ public class IODetector extends ContextDetector {
 	
 	
 	// return the context of indoor or outdoor,0 means outdoor and 1 means indoor
-	public int GetIOcontext(){
+	
+	 public int GetIOcontext(){
+	
 		if(la.GetLight()>1000)
 		   {
 			iocontext=0; 
 			}
-		else if (GPSSNR<16||maxSNR<28||GPSN<6)
-		   {iocontext=1;}
+		else if (GPSSNR<16||maxSNR<28||GPSN<7)
+		   {
+			iocontext=1;
+			}
 		else if (wifiN*0.11+wifimean*-0.07524+wifistd*-0.12+GPSN*-0.59+GPSSNR*-0.14>-9.82)
 		   {
 			iocontext=1;
@@ -145,6 +148,77 @@ public class IODetector extends ContextDetector {
 		{ iocontext=0;}
 	    return iocontext;		
 	}
+	
+	//another method of indoor detect using confidence level
+//	public int GetIOcontext(){
+//		double light=0;
+//		double gps=0;
+//		double snr=0;
+//		double wifi=0;
+//		if(la.GetLight()>1000)
+//		   {
+//			light=1;
+//			}
+//		if(la.GetLight()<=1000&&la.GetLight()>500)
+//		   {
+//			light=0.5;
+//			}
+//		if(la.GetLight()<=500)
+//		   {
+//			light=0;
+//			}
+//		if(GPSN<7)
+//		{
+//			gps=-0.5;
+//		}
+//		if(GPSN>=8&&GPSN<=10)
+//		{
+//			gps=0;
+//		}
+//		if(GPSN>=11)
+//		{
+//			gps=0.5;
+//		}
+//		if(GPSSNR<14)
+//		{
+//			snr=-0.5;
+//		}
+//		if(GPSSNR>=14&&GPSSNR<18)
+//		{
+//			snr=-0.3;
+//		}
+//		if(GPSSNR>=18&&GPSSNR<21)
+//		{
+//			snr=0;
+//		}
+//		if(GPSSNR>=21&&GPSSNR<24)
+//		{
+//			snr=0.3;
+//		}
+//		if(GPSSNR>=24)
+//		{
+//			snr=0.5;
+//		}
+//		
+//		if(wifimean<68)
+//		{
+//			wifi=-1;
+//		}
+//		
+//		if(wifimean>=68&&wifimean<76)
+//		{
+//			wifi=-0.5;
+//		}
+//		
+//		if(wifimean>=76)
+//		{
+//			wifi=0;
+//		}
+//	
+//		iocontext=(light+gps+wifi+snr>0)?0:1;
+//	    return iocontext;		
+//	}
+	
 
 	
 	
