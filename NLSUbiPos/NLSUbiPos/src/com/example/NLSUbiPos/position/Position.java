@@ -7,6 +7,7 @@ import com.example.NLSUbiPos.context.OnContextListener;
 import com.example.NLSUbiPos.coordinate.Mercator;
 import com.example.NLSUbiPos.floor.OnFloorListener;
 import com.example.NLSUbiPos.heading.OnHeadingChangeListener;
+import com.example.NLSUbiPos.motion.OnMotionListener;
 import com.example.NLSUbiPos.satellite.OnGPSPositionListener;
 import com.example.NLSUbiPos.stepdetecor.OnStepListener;
 import com.example.NLSUbiPos.wireless.OnWirelessPositionListener;
@@ -17,7 +18,7 @@ import com.example.NLSUbiPos.wireless.OnWirelessPositionListener;
  */
 
 public abstract class Position implements OnStepListener, OnHeadingChangeListener,OnFloorListener,OnContextListener,
-OnWirelessPositionListener,OnGPSPositionListener {
+OnWirelessPositionListener,OnGPSPositionListener,OnMotionListener {
 	
 	protected Building building;
 	protected Mercator CurrentWiFiLocation;

@@ -24,7 +24,7 @@ import android.location.Location;
  *
  */
 public class ParticlePosition extends Position{
-	
+/*	
 	public static enum Motion{
 		walking, turning, stairs, running
 	}
@@ -32,7 +32,7 @@ public class ParticlePosition extends Position{
 	public static enum State{
 		texting, calling, pocket, handSwing
 	}
-	
+	*/
 	private int numberOfParticles;
 	
 	private Set<Particle> particles;
@@ -53,7 +53,7 @@ public class ParticlePosition extends Position{
 	
 //	private double initialSpread = 0.7;
 	
-	private int stepCount = 0;
+	private int stepCount;
 	
 	private Building building;
 	
@@ -78,6 +78,8 @@ public class ParticlePosition extends Position{
 	public Lonlat CurrentLonlatLocation;
 	
 	private List<PositionProb> WiFiList;
+	
+	private int motionLabel = 0;
 	
 	private Collection<Line2d> workingSet = new HashSet<Line2d>();
 	
@@ -132,8 +134,7 @@ public class ParticlePosition extends Position{
 		stepCount++;
 		stepLength = event.getStepLength();
 		for(Particle particle : particles){
-//			particle.motionConfigure(stepLength);
-			particle.setStepLength(stepLength + stepLengthSpread * NormalDistribution.randn());
+			particle.motionConfigure(motionLabel, stepLength + stepLengthSpread * NormalDistribution.randn());
 			particle.setWiFiLocation(findNearestAP(particle, WiFiList));
 		}
 		HashSet<Particle> livedParticles = new HashSet<Particle>(particles.size());
@@ -200,7 +201,16 @@ public class ParticlePosition extends Position{
 	@Override
 //	public void onContext(ContextEvent event) {
 	public void onContext(int context) {
-		// TODO Auto-generated method stub
+		switch(context){
+		case(0):
+//			t="Outdoor";
+			GPSAssistance = true;
+			break;
+		case(1):
+			GPSAssistance = false;
+//			t="Indoor";
+		    break;
+		}
 		
 	}
 	
@@ -361,6 +371,11 @@ public class ParticlePosition extends Position{
 			}
 		}
 		return minDistAP;
+	}
+
+	@Override
+	public void onMotion(int motion) {
+		motionLabel = motion;
 	}
 
 	

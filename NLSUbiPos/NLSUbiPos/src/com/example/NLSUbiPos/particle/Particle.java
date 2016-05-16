@@ -2,8 +2,6 @@ package com.example.NLSUbiPos.particle;
 
 import java.util.Random;
 
-import com.example.NLSUbiPos.position.ParticlePosition.Motion;
-import com.example.NLSUbiPos.position.ParticlePosition.State;
 import com.example.NLSUbiPos.utils.NormalDistribution;
 import com.example.NLSUbiPos.wireless.PositionInfo;
 
@@ -20,10 +18,6 @@ public class Particle implements Cloneable{
 	private double stepLength;
 	
 	private int ID;
-	
-	private Motion motion;
-	
-	private State state;
 	
 	private PositionInfo wifiPosition;
 	
@@ -71,23 +65,29 @@ public class Particle implements Cloneable{
 		this.yCoordinate = particle.yCoordinate;
 	}
 	
-	public void motionConfigure(double stepLength){
-		switch(this.motion){
-		case walking:
-			this.stepLength = stepLength;
+	public void motionConfigure(int motion, double length){
+		switch(motion){
+		case 0://walk
+			this.stepLength = length;
 			break;
-		case turning:
-			this.stepLength = 0.8 * stepLength;
+		case 1://still
+			this.stepLength = 0;
 			break;
-		case stairs:
-			this.stepLength = 0.5;
+		case 2://elevator up
+			this.stepLength = 0;
 			break;		
-		case running:
-			this.stepLength = 1.25 * stepLength;
+		case 3://elevator down
+			this.stepLength = 0;
+			break;
+		case 4://upstairs
+			this.stepLength = 0.5;
+			break;
+		case 5://downstairs
+			this.stepLength = 0.5;
 			break;
 		}
 	}
-	
+/*	
 	public void stateConfigure(){
 		switch(this.state){
 		case texting:
@@ -103,7 +103,7 @@ public class Particle implements Cloneable{
 			break;
 		}
 	}
-	
+	*/
 	public double getXCoordinate(){
 		return xCoordinate;
 	}
