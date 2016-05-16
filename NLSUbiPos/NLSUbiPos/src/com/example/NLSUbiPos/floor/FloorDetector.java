@@ -13,8 +13,13 @@ public abstract class FloorDetector implements SensorEventListener{
 	
 	public int floor;
 	//the floor event listeners registered
+	
+	public int initialfloor;
+	
 	private ArrayList<OnFloorListener> OnFloorListeners= new ArrayList<OnFloorListener>();
 	
+    public void setinifloor(int floor){
+	}
 	
 	//register a floor event listener
 	public void addOnFloorListener(OnFloorListener listener){
@@ -26,7 +31,7 @@ public abstract class FloorDetector implements SensorEventListener{
 		OnFloorListeners.clear();
 	}
 	
-	//Notify all the listeners registered a floor event has occourred
+	//Notify all the listeners registered a floor event has occurred
 	public void notifyFloorEvent(int floor){
 		for(OnFloorListener listener:OnFloorListeners){
 			listener.onFloor(floor);

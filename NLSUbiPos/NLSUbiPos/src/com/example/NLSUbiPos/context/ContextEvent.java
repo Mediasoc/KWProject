@@ -1,6 +1,6 @@
 package com.example.NLSUbiPos.context;
 /**
- * this class includes the indormation of a context event,when a context event is detected it will be sent to listeners
+ * this class includes the information of a context event,when a context event is detected it will be sent to listeners
  * @author WZ
  *
  */

@@ -37,7 +37,7 @@ import android.hardware.SensorManager;
 		switch(event.sensor.getType()) {
 	case Sensor.TYPE_LIGHT:
 		 light= event.values[0];
-		 System.out.println( light);
+//		 System.out.println( light);
 		break;
 	}
 		

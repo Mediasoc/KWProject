@@ -3,9 +3,13 @@ package com.example.NLSUbiPos.position;
  * this class manage the detectors in the system
  */
 import com.example.NLSUbiPos.context.ContextDetector;
+import com.example.NLSUbiPos.context.IODetector;
 import com.example.NLSUbiPos.floor.FloorDetector;
+import com.example.NLSUbiPos.floor.PressureFloorDetector;
 import com.example.NLSUbiPos.heading.Compass;
 import com.example.NLSUbiPos.heading.GyroCompass;
+import com.example.NLSUbiPos.motion.MotionDetector;
+import com.example.NLSUbiPos.motion.SimpleMotionDetector;
 import com.example.NLSUbiPos.stepdetecor.MovingAverageStepDetector;
 import com.example.NLSUbiPos.stepdetecor.StepDetector;
 
@@ -21,16 +25,24 @@ public class PositionClient {
 	
 	Compass compass;
 	
-	ContextDetector contextdetector;
+//	ContextDetector contextdetector;
+	IODetector contextdetector;
 	
 	StepDetector stepdetector;
 	
 	SensorManager sensormanager;
 	
+	MotionDetector motiondetector;
+	
 	public PositionClient(Context context){
 		this.context=context;
 		stepdetector=new MovingAverageStepDetector();
 		compass=new GyroCompass();
+		//added by wl
+		floordetector=new PressureFloorDetector();
+		contextdetector=new IODetector(context);
+		motiondetector=new SimpleMotionDetector();
+		
 		/**
 		 * the extend floordetector and contextdetector are needed 
 		 */
@@ -46,8 +58,16 @@ public class PositionClient {
 		Sensor gyroscope = sensormanager.getDefaultSensor(Sensor.TYPE_GYROSCOPE);
 		Sensor magnetometer = sensormanager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD);
 		
-		if(accelerometer==null || gyroscope==null || magnetometer==null) {
-			throw new RuntimeException("not supported sensor(accelerometer|gyroscope|magnetometer)");
+		//added by wl
+		Sensor pressure= sensormanager.getDefaultSensor(Sensor.TYPE_PRESSURE);
+		Sensor light= sensormanager.getDefaultSensor(Sensor.TYPE_LIGHT);
+		
+		Sensor gravity= sensormanager.getDefaultSensor(Sensor.TYPE_GRAVITY);
+		Sensor linacc= sensormanager.getDefaultSensor(Sensor.TYPE_LINEAR_ACCELERATION);
+	
+		
+		if(accelerometer==null || gyroscope==null || magnetometer==null||pressure==null) {
+			throw new RuntimeException("not supported sensor(accelerometer|gyroscope|magnetometer|pressure)");
 		}
 		
 		// registers accelerometer for step detector
@@ -58,6 +78,24 @@ public class PositionClient {
 		sensormanager.registerListener(compass, accelerometer, SensorManager.SENSOR_DELAY_GAME);
 		sensormanager.registerListener(compass, magnetometer, SensorManager.SENSOR_DELAY_GAME);
 		
+		/*
+		 * added by wl
+		 * */
+		 
+		// registers accelerometer for floordetector
+		sensormanager.registerListener(floordetector, pressure, SensorManager.SENSOR_DELAY_GAME);
+		
+		// registers accelerometer for context detector
+		sensormanager.registerListener(contextdetector, light, SensorManager.SENSOR_DELAY_GAME);
+		
+		sensormanager.registerListener(motiondetector, gravity, SensorManager.SENSOR_DELAY_GAME);
+		sensormanager.registerListener(motiondetector, linacc, SensorManager.SENSOR_DELAY_GAME);
+		sensormanager.registerListener(motiondetector, pressure, SensorManager.SENSOR_DELAY_GAME);
+		
+		
+		
+		
+		
 	}
 	
 	
@@ -67,13 +105,15 @@ public class PositionClient {
 	public void unregisterSensorListener() {
 		sensormanager.unregisterListener(stepdetector);
 		sensormanager.unregisterListener(compass);
+		sensormanager.unregisterListener(floordetector);
+		sensormanager.unregisterListener(contextdetector);
 	}
 	
 	public FloorDetector getFloorDetector(){
 		return floordetector;
 	}
 	
-	public ContextDetector getContextDetector(){
+	public IODetector getContextDetector(){
 		return contextdetector;
 	}
 	
@@ -84,5 +124,9 @@ public class PositionClient {
 	public Compass getCompass(){
 		return compass;
 	}
+	public MotionDetector getMotionDetector(){
+		return motiondetector;
+	}
+	
 
 }

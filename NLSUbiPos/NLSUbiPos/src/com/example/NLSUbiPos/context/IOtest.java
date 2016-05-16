@@ -4,6 +4,7 @@ package com.example.NLSUbiPos.context;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import com.example.NLSUbiPos.position.PositionClient;
 import com.example.fusionnavigation.R;
 
 import android.app.Activity;
@@ -38,14 +39,15 @@ public class IOtest extends Activity implements SensorEventListener{
     private SensorManager sensorManager;
     private LocationManager locationManager;
     int lightsize=0;
+    private PositionClient pc;
     
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.iotest);
+//		pc=new PositionClient(this);
 	    id=new IODetector(this);
-	    sensorManager=id.la.mSensorManager;
+//	    sensorManager=id.la.mSensorManager;
 	    locationManager=id.locationManager;
-//	    locationManager=id.ga.locationManager;
 	    final Sensor sensorlight = id.la.mSensorManager.getDefaultSensor(Sensor.TYPE_LIGHT);
 		start=(Button)findViewById(R.id.starttest);
 		testtext=(TextView) findViewById(R.id.result_test);
@@ -143,4 +145,7 @@ public class IOtest extends Activity implements SensorEventListener{
 		// TODO 自动生成的方法存根
 		
 	}
+
+
+	
 }

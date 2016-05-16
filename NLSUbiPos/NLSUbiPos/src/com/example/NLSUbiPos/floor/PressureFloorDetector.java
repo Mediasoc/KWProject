@@ -32,6 +32,7 @@ public class PressureFloorDetector extends FloorDetector {
 	}
 	
 	//set the initial floor number
+	@Override
 	public void setinifloor(int floor){
 		
 		initialfloor=floor;
@@ -45,6 +46,12 @@ public class PressureFloorDetector extends FloorDetector {
 		 pressureList.add(event.values[0]);
 		 }
 		 pressureSize++;
+		
+		floornum=getFloor();
+		//传感器每采集一次数据notify一次
+		notifyFloorEvent(floornum);
+//		System.out.println(floornum);
+//		 }
 	}
 	
 	// return current pressure data
@@ -62,8 +69,9 @@ public class PressureFloorDetector extends FloorDetector {
 	//return floor number
 	public int getFloor() {
 		pressureSize=0;
-		int a=(int) ((currentpressure-pressureList.get(3))/0.4);
+		int a=(int) ((currentpressure-pressureList.get(0))/0.4);
 		floornum=initialfloor-a;
+//		floornum=3;
 		return floornum;
 	}
 
@@ -72,7 +80,8 @@ public class PressureFloorDetector extends FloorDetector {
 		synchronized (this) {
 			if (event.sensor.getType() == Sensor.TYPE_PRESSURE) {
 				processPressureEvent(event);
-					
+			
+//				System.out.println(event.values[0]);
 			}
 		}
 		
