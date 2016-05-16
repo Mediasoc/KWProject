@@ -34,6 +34,7 @@ public class Particle implements Cloneable{
 		this.headingBias = bias;
 		this.stepLength = stepLength;
 		this.ID = ID;
+		this.wifiPosition = new PositionInfo();
 	}
 	
 	public static Particle circleNormalDistribution(double xAverage, double yAverage, int floor, double radiusSigma, double heading, double biasSTD, double stepLength, int ID){
