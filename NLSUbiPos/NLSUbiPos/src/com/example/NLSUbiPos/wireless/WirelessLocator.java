@@ -55,7 +55,7 @@ public abstract class WirelessLocator {
 	 * Constructor with the given context.
 	 * @param context the application context
 	 */
-	protected WirelessLocator(Context context, String pathname) {
+	protected WirelessLocator(Context context) {
 		this.context = context;
 		accessPointAddress = new ArrayList<String>();
 		accessPointCoordinate = new ArrayList<Mercator>();

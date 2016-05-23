@@ -11,6 +11,7 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 import com.example.NLSUbiPos.coordinate.Mercator;
+import com.example.NLSUbiPos.floor.OnFloorListener;
 
 
 
@@ -26,20 +27,35 @@ import android.util.Log;
 /**
  * The wireless locator using WiFi signals.
  */
-public class WifiLocator extends WirelessLocator {
+public class WifiLocator extends WirelessLocator implements OnFloorListener {
 	
 	// manages the WiFi function
 	private WifiManager wifimanager;
 	//location
 	public  Mercator CurrentLocation=new Mercator(0,0);
 	
+	private int currentfloor=0;
+	
+	private int receivedfloor=0;
+	
 	// the received WiFi list by scanning
 	private List<ScanResult> scanresults;
 	
 	//the WiFi signal database
-	public static List<databaseRecord> database=new ArrayList<databaseRecord>();
+	public  List<databaseRecord> database=new ArrayList<databaseRecord>();
 	
-	private static boolean IsDatabaseInitialized=false;
+	public static List<databaseRecord> database1=new ArrayList<databaseRecord>();
+	public static List<databaseRecord> database2=new ArrayList<databaseRecord>();
+	public static List<databaseRecord> database3=new ArrayList<databaseRecord>();
+	public static List<databaseRecord> database4=new ArrayList<databaseRecord>();
+	
+	private static List<Boolean>databasestatus=new ArrayList<Boolean>();
+	static{
+		databasestatus.add(false);
+		databasestatus.add(false);
+		databasestatus.add(false);
+		databasestatus.add(false);
+	}
 	
 	
 	//record the input wifi signal
@@ -56,8 +72,8 @@ public class WifiLocator extends WirelessLocator {
 	 * Constructs a WiFi locator.
 	 * 
 	 */
-	public WifiLocator(Context context, String pathname) {
-		super(context, pathname);
+	public WifiLocator(Context context) {
+		super(context);
 		wifimanager=(WifiManager)context.getSystemService(context.WIFI_SERVICE);
 		
 		if (!wifimanager.isWifiEnabled()) {
@@ -66,13 +82,17 @@ public class WifiLocator extends WirelessLocator {
 			}
 		}
 		//initialize the database
-		readDataBase(pathname);
+		database1=readDataBase("/sdcard/Fingerprint/Data/database_F1.txt");databasestatus.set(0, true);
+		database2=readDataBase("/sdcard/Fingerprint/Data/database_F2.txt");databasestatus.set(1, true);
+		database3=readDataBase("/sdcard/Fingerprint/Data/database_F3.txt");databasestatus.set(2, true);
+		database4=readDataBase("/sdcard/Fingerprint/Data/database_F4.txt");databasestatus.set(3, true);
 		//register wifi receiver
 		context.registerReceiver(new BroadcastReceiver(){
 			
 			public void onReceive(Context context,Intent intent){
-				if(IsDatabaseInitialized){
-					
+				System.out.println(888);
+				if(receivedfloor!=0){
+					if(databasestatus.get(receivedfloor-1)==true){
 					scanresults=wifimanager.getScanResults();
 					
 					if( scanresults!=null){
@@ -102,8 +122,8 @@ public class WifiLocator extends WirelessLocator {
 				    	  sortPositionProbList();
 				    	 
 				    	 PositionProbList=PositionCounting(3);
-				    	  PositionInfoTmp = WKNN(3);
-				    	  if(PositionInfoTmp!=null){
+				    	 // PositionInfoTmp = WKNN(3);
+				    	  if(PositionProbList!=null){
 				    		  System.out.println(1);
 				    	  // CurrentLocation.=PositionInfoTmp.x;
 				    	  // CurrentLocation.y=PositionInfoTmp.y;
@@ -117,7 +137,7 @@ public class WifiLocator extends WirelessLocator {
 					
 					}
 					 
-					
+				}
 			}
 			
 			
@@ -155,7 +175,8 @@ public class WifiLocator extends WirelessLocator {
 		}
 	}
 
-	private void readDataBase(String pathname){
+	private List<databaseRecord> readDataBase(String pathname){
+		List<databaseRecord> databasetmp=new ArrayList<databaseRecord>();
 		File file=new File(pathname);
 		if (!file.isAbsolute()) {
 			file = new File(Environment.getExternalStorageDirectory(), pathname);
@@ -164,7 +185,7 @@ public class WifiLocator extends WirelessLocator {
 		 if (!file.exists())
 		    {
 		    	Log.e("error", "dbFileNotFound");
-		    	return ;
+		    	return null ;
 		    }
 		 
 		 BufferedReader bufferedreader=null;
@@ -174,7 +195,7 @@ public class WifiLocator extends WirelessLocator {
 		 } catch (FileNotFoundException e) {
 				// TODO Auto-generated catch block
 		    	Log.e("error", "dbFileNotFound");
-		    	return ;
+		    	return null ;
 			}
 		 
 		 String parameterString;
@@ -198,9 +219,9 @@ public class WifiLocator extends WirelessLocator {
 
 					isPositionFound = false;
 					int PositionIndex;
-					for( PositionIndex = 0 ; PositionIndex< database.size();PositionIndex++){
+					for( PositionIndex = 0 ; PositionIndex< databasetmp.size();PositionIndex++){
 					
-						if(database.get(PositionIndex).aPositionInfo.o == PositionInfoTmp.o && database.get(PositionIndex).aPositionInfo.x == PositionInfoTmp.x && database.get(PositionIndex).aPositionInfo.y == PositionInfoTmp.y && database.get(PositionIndex).aPositionInfo.z == PositionInfoTmp.z )
+						if(databasetmp.get(PositionIndex).aPositionInfo.o == PositionInfoTmp.o && databasetmp.get(PositionIndex).aPositionInfo.x == PositionInfoTmp.x && databasetmp.get(PositionIndex).aPositionInfo.y == PositionInfoTmp.y && databasetmp.get(PositionIndex).aPositionInfo.z == PositionInfoTmp.z )
 						{	
 							//already have this point
 							isPositionFound = true;
@@ -210,10 +231,10 @@ public class WifiLocator extends WirelessLocator {
 					
 					if(!isPositionFound)
 					{
-						database.add(DatabaseRecordTmp);
+						databasetmp.add(DatabaseRecordTmp);
 					}
 					
-					database.get(PositionIndex).macAddrList.add(Long.parseLong(StringArray[5]));
+					databasetmp.get(PositionIndex).macAddrList.add(Long.parseLong(StringArray[5]));
 					
 					
 					DoubleListTmp = new ArrayList<Double>();
@@ -227,16 +248,18 @@ public class WifiLocator extends WirelessLocator {
 					
 				
 					
-					database.get(PositionIndex).RssiListList.add(DoubleListTmp);
-					IsDatabaseInitialized=true;
+					databasetmp.get(PositionIndex).RssiListList.add(DoubleListTmp);
+					
 				}
 				
 				bufferedreader.close();
+				//return databasetmp;
 				
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
-			}	
+			}
+			return databasetmp;	
 	}
 	
 	
@@ -562,7 +585,7 @@ public class WifiLocator extends WirelessLocator {
 			int knnNumber = KnnNumber;
 			
 			if(PositionProbList.size() == 0)
-			{System.out.println(2);
+			{
 				// error return PositionProbList==null
 				return null;
 				
@@ -587,7 +610,7 @@ public class WifiLocator extends WirelessLocator {
 				PositionInfoTmp.z = PositionInfoTmp.z/probCount;
 				PositionInfoTmp.o = PositionInfoTmp.o/probCount;
 			}else
-			{System.out.println(3);
+			{
 				// error return probCount==0
 				return null;
 			}
@@ -598,12 +621,12 @@ public class WifiLocator extends WirelessLocator {
 		List<PositionProb> PositionCounting(int Number){
 			int num=Number;
 			if(PositionProbList.size() == 0)
-			{System.out.println(2);
+			{
 				// error return PositionProbList==null
 				return null;
 				
 			}
-			List<PositionProb> PositionProbList=new ArrayList<PositionProb>();
+			//List<PositionProb> PositionProbList=new ArrayList<PositionProb>();
 			PositionInfo PositionInfoTmp = new PositionInfo();
 			PositionProb PositionProbTmp=new PositionProb();
 			double probCount = 0;
@@ -630,5 +653,16 @@ public class WifiLocator extends WirelessLocator {
 			}
 			
 			return PositionProbList;
+		}
+
+		@Override
+		public void onFloor(int floor) {
+			// TODO 自动生成的方法存根
+			receivedfloor=floor;
+			
+			if(receivedfloor!=0&&currentfloor!=receivedfloor){
+				database=database3;
+			}
+			currentfloor=receivedfloor;
 		}
 }

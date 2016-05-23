@@ -50,7 +50,7 @@ public class PressureFloorDetector extends FloorDetector {
 		floornum=getFloor();
 		//传感器每采集一次数据notify一次
 		notifyFloorEvent(floornum);
-//		System.out.println(floornum);
+	//System.out.println(floornum);
 //		 }
 	}
 	
@@ -81,7 +81,7 @@ public class PressureFloorDetector extends FloorDetector {
 			if (event.sensor.getType() == Sensor.TYPE_PRESSURE) {
 				processPressureEvent(event);
 			
-//				System.out.println(event.values[0]);
+			//System.out.println(event.values[0]);
 			}
 		}
 		
