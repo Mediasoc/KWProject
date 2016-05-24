@@ -46,7 +46,7 @@ public class IODetector extends ContextDetector {
 	private int iocontext; 
 	
 	//register the locationManager
-	LocationManager locationManager;
+	public LocationManager locationManager;
 	
 	//the object of LightAdmin and WifiAdmin
     LightAdmin la; 
