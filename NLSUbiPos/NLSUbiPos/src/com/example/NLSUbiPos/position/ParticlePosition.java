@@ -1,5 +1,8 @@
 package com.example.NLSUbiPos.position;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.OutputStream;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -17,6 +20,8 @@ import com.example.NLSUbiPos.utils.NormalDistribution;
 import com.example.NLSUbiPos.wireless.PositionInfo;
 import com.example.NLSUbiPos.wireless.PositionProb;
 import android.location.Location;
+import android.os.Environment;
+import android.util.Log;
 
 /**
  * added by LiuDonghui on 20160415
@@ -37,14 +42,6 @@ public class ParticlePosition extends Position{
 	
 	private Set<Particle> particles;
 	
-	private double heading;
-	
-	private double stepLength;
-	
-	private double positionX;
-	
-	private double positionY;
-	
 	private double headingSpread = Math.PI * 45 /180;
 	
 	private double stepLengthSpread = 0.2;
@@ -55,9 +52,9 @@ public class ParticlePosition extends Position{
 	
 	private int stepCount;
 	
-	private Building building;
+//	private Building building;
 	
-	private static final int DEFAULT_PARTICLE_COUNT = 2000;
+	private static final int DEFAULT_PARTICLE_COUNT = 1000;
 	
 	private boolean STEP_CALI = true;
 	
@@ -81,12 +78,19 @@ public class ParticlePosition extends Position{
 	
 	private int motionLabel = 0;
 	
+	private int contextLabel = -1;
+	
 	private Collection<Line2d> workingSet = new HashSet<Line2d>();
 	
 	public ParticlePosition(double xAverage, double yAverage, int floor){
 		numberOfParticles = DEFAULT_PARTICLE_COUNT;
 		stepCount = 0;
-		setPosition(xAverage, yAverage, floor);
+		
+		if(WiFiAssistance && WiFiList != null){
+			wifiInitializePosition(WiFiList, floor);
+		}else{
+			setPosition(xAverage, yAverage, floor);
+		}
 	}
 	
 	@Override
@@ -97,36 +101,38 @@ public class ParticlePosition extends Position{
 		if(particles != null && particles.size() ==0){
 			while (number <= numberOfParticles){
 				length = 0.7 + stepLengthSpread * NormalDistribution.randn();
-				particles.add(Particle.singlePosition(xAverage, yAverage, floor, headingSpread, 
-						length, number));
+				particles.add(Particle.singlePosition(xAverage, yAverage, floor, 
+						headingSpread, length, number));
 				number++;
 			}
 			positionX = xAverage;
 			positionY = yAverage;
 		}else {
 			particles = new HashSet<Particle>(numberOfParticles);
-			if(WiFiAssistance && WiFiList != null){
-				for(PositionProb positionProb : WiFiList){
-					while(number <= positionProb.prob * numberOfParticles){
-						length = 0.7 +stepLengthSpread * NormalDistribution.randn();				
-						particles.add(Particle.circleNormalDistribution(positionProb.aPositionInfo.x, 
-								positionProb.aPositionInfo.y, floor, positionSpread, heading, 
-								headingSpread, length, number));
-						number++;
-					}
-					number = 0;
-				}
-			}else{
-				while(number <= numberOfParticles){
-					length = 0.7 +stepLengthSpread * NormalDistribution.randn();				
-					particles.add(Particle.circleNormalDistribution(xAverage, yAverage, floor, 
-							positionSpread, heading, headingSpread, length, number));
-					number++;
+			while(number <= numberOfParticles){
+				length = 0.7 +stepLengthSpread * NormalDistribution.randn();
+				particles.add(Particle.circleNormalDistribution(xAverage, yAverage, floor,
+						positionSpread, heading, headingSpread, length, number));
+				number++;
 				}		
 			}
 			computeCloudAverage();			
+	}
+	
+	public void wifiInitializePosition(List<PositionProb> list, int floor){
+		int number = 1;
+		double length;
+		particles = new HashSet<Particle>(numberOfParticles);
+		for(PositionProb positionProb : WiFiList){
+			while(number <= positionProb.prob * numberOfParticles){
+				length = 0.7 +stepLengthSpread * NormalDistribution.randn();				
+				particles.add(Particle.circleNormalDistribution(positionProb.aPositionInfo.x, 
+						positionProb.aPositionInfo.y, floor, positionSpread, heading, 
+						headingSpread, length, number));
+				number++;
+			}
+			number = 0;
 		}
-		
 	}
 
 	@Override
@@ -180,6 +186,8 @@ public class ParticlePosition extends Position{
 		}
 		computeCloudAverage();
 		computeMeanBias();
+		
+		savePositionData(event.getTimestamp(), positionX, positionY, floor, heading, WiFiList, motionLabel, contextLabel);
 	}
 
 	@Override
@@ -191,7 +199,8 @@ public class ParticlePosition extends Position{
 		}		
 		if(GPSAssistance){
 			if(GPSCredibility < 8){
-				this.heading = (this.heading + GPSCredibility * GPSBearing)/(1 + GPSCredibility);
+				this.heading = (this.heading + GPSCredibility * GPSBearing)
+						/(1 + GPSCredibility);
 			}else{
 				this.heading = GPSBearing;
 			}
@@ -201,13 +210,16 @@ public class ParticlePosition extends Position{
 	@Override
 //	public void onContext(ContextEvent event) {
 	public void onContext(int context) {
+		contextLabel = context;
 		switch(context){
 		case(0):
 //			t="Outdoor";
 			GPSAssistance = true;
+			WiFiAssistance = false;
 			break;
 		case(1):
 			GPSAssistance = false;
+			WiFiAssistance = true;
 //			t="Indoor";
 		    break;
 		}
@@ -241,7 +253,6 @@ public class ParticlePosition extends Position{
 	
 	private void resample(HashSet<Particle> deadParticles){
 		HashSet<Particle> newParticles = new HashSet<Particle>(numberOfParticles);
-		double length;
 		Particle livedParticle;
 		Iterator<Particle> iter = particles.iterator();
 		for(Particle particle : deadParticles){
@@ -336,7 +347,7 @@ public class ParticlePosition extends Position{
 				(particle.getXCoordinate() - particle.getWiFiLocation().x) + 
 				(particle.getYCoordinate() - particle.getWiFiLocation().y) * 
 				(particle.getYCoordinate() - particle.getWiFiLocation().y));
-		if(dist > 2){
+		if(dist > 3){
 			return false;
 		}else{
 			return true;
@@ -376,7 +387,62 @@ public class ParticlePosition extends Position{
 	@Override
 	public void onMotion(int motion) {
 		motionLabel = motion;
+		//TODO trigger setPosition() when pedestrian is at elevator and stairs
+		switch(motion){
+		case 2://elevator up
+//			setPosition();
+			break;		
+		case 3://elevator down
+//			setPosition();
+			break;
+		case 4://upstairs
+//			setPosition();
+			break;
+		case 5://downstairs
+//			setPosition();
+			break;
+		}
 	}
 
-	
+	public void savePositionData(long time, double x, double y, int floor, double heading, List<PositionProb> WiFi, int motion, int context){
+		String filename = "PositionData.txt";
+		if(Environment.MEDIA_MOUNTED.equals(Environment.getExternalStorageState())){
+			File file = new File(Environment.getExternalStorageDirectory(),filename);
+			
+			OutputStream os;
+			try{
+				os = new FileOutputStream(file,true);
+				os.write(String.valueOf(time).getBytes());
+				os.write(" ".getBytes());
+				os.write(String.valueOf((int)(x*1000)/1000.0).getBytes());
+				os.write(" ".getBytes());
+				os.write(String.valueOf((int)(y*1000)/1000.0).getBytes());
+				os.write(" ".getBytes());
+				os.write(String.valueOf(floor).getBytes());
+				os.write(" ".getBytes());
+				os.write(String.valueOf((int)(heading*1000/Math.PI*180)/1000.0).getBytes());
+				os.write(" ".getBytes());
+				double wifiX = 0;
+				double wifiY = 0;
+				for(PositionProb positionProb : WiFiList){
+					wifiX += positionProb.aPositionInfo.x * positionProb.prob;
+					wifiY += positionProb.aPositionInfo.y * positionProb.prob;
+				}
+				os.write(String.valueOf((int)(wifiX*1000)/1000.0).getBytes());
+				os.write(" ".getBytes());
+				os.write(String.valueOf((int)(wifiY*1000)/1000.0).getBytes());
+				os.write(" ".getBytes());
+				os.write(String.valueOf(motion).getBytes());
+				os.write(" ".getBytes());
+				os.write(String.valueOf(context).getBytes());
+				os.write(" ".getBytes());
+				os.write("\r\n".getBytes());
+				os.close();
+			} catch(Exception e){
+				e.printStackTrace();
+			}
+		}else{
+			Log.d("File save", "External Storage is not available");
+		}
+	}
 }

@@ -21,7 +21,15 @@ public abstract class Position implements OnStepListener, OnHeadingChangeListene
 OnWirelessPositionListener,OnGPSPositionListener,OnMotionListener {
 	
 	protected Building building;
-	protected Mercator CurrentWiFiLocation;
+	
+	protected double heading;
+	
+	protected double stepLength;
+	
+	protected double positionX;
+	
+	protected double positionY;
+//	protected Mercator CurrentWiFiLocation;
 	protected Mercator CurrentGPSLocation;
 	protected int floor;
 

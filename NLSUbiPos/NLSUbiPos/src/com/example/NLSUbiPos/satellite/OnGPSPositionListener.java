@@ -1,7 +1,5 @@
 package com.example.NLSUbiPos.satellite;
 
-import com.example.NLSUbiPos.coordinate.Mercator;
-
 import android.location.Location;
 
 // Edited by Liu on 20160513
