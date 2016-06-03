@@ -68,6 +68,8 @@ public class WifiLocator extends WirelessLocator implements OnFloorListener {
 	
 	public  PositionInfo PositionInfoTmp = new PositionInfo();
 
+	BroadcastReceiver broadcastReceiver;
+	
 	/**
 	 * Constructs a WiFi locator.
 	 * 
@@ -87,7 +89,7 @@ public class WifiLocator extends WirelessLocator implements OnFloorListener {
 		database3=readDataBase("/sdcard/Fingerprint/Data/database_F3.txt");databasestatus.set(2, true);
 		database4=readDataBase("/sdcard/Fingerprint/Data/database_F4.txt");databasestatus.set(3, true);
 		//register wifi receiver
-		context.registerReceiver(new BroadcastReceiver(){
+		broadcastReceiver = new BroadcastReceiver(){
 			
 			public void onReceive(Context context,Intent intent){
 				System.out.println(888);
@@ -141,7 +143,8 @@ public class WifiLocator extends WirelessLocator implements OnFloorListener {
 			}
 			
 			
-		}, new IntentFilter(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION));
+		};
+		context.registerReceiver(broadcastReceiver,new IntentFilter(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION));
 		
 		     
 	}
@@ -172,6 +175,9 @@ public class WifiLocator extends WirelessLocator implements OnFloorListener {
 			// cancels the scanning task
 			timer.cancel();
 			timer = null;
+		}
+		if(broadcastReceiver != null){
+			context.unregisterReceiver(broadcastReceiver);
 		}
 	}
 

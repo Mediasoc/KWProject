@@ -44,11 +44,16 @@ public class Building {
 	 * @return the Building representation of the real building
 	 */
 	public static Building factory(String parentPath, String buildingName) {
-		Building building = null;
-		
+		Building building = null;		
 		// parse the XML file
 		building = Building.parseFromXml(parentPath + "/" + buildingName + ".xml");
-		
+		return building;
+	}
+	/**
+	 * Building the mapping relationship between grid points and lines used for particle filter
+	 * @param building the object from class Building
+	 */
+	public static void pointLinesMap(Building building){
 		if (building != null) {
 			// the following calls is beneficial for the collision check in the particle filter
 			for (Floor floor : building.floors.values()) { 
@@ -56,8 +61,6 @@ public class Building {
 				floor.getStairsArea().generatePointLinesMap();
 			}
 		}
-		
-		return building;
 	}
 	
 	/**

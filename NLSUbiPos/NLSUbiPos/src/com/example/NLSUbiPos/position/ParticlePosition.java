@@ -83,6 +83,7 @@ public class ParticlePosition extends Position{
 	private Collection<Line2d> workingSet = new HashSet<Line2d>();
 	
 	public ParticlePosition(double xAverage, double yAverage, int floor){
+		Log.d("MainActivity", "ParticlePosition start");
 		numberOfParticles = DEFAULT_PARTICLE_COUNT;
 		stepCount = 0;
 		
