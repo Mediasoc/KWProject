@@ -63,9 +63,8 @@ public class SimpleMotionDetector extends MotionDetector {
 			instances[0] = getMean(amplitude, linearaccSize);
 			gravitySize = 0;
 		    linearaccSize = 0;
-		    pressureSize=0; 
 		    pressuredif=getPredif();
-		   
+		    pressureSize=0; 
 		   
 
 	    
