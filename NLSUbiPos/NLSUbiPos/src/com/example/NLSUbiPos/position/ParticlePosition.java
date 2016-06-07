@@ -185,6 +185,8 @@ public class ParticlePosition extends Position{
 				}else{
 					setPosition(CurrentGPSLocation.getX(), CurrentGPSLocation.getY(),floor);
 				}
+			}else if(WiFiAssistance){
+				wifiInitializePosition(WiFiList, floor);
 			}else{
 				setPosition(positionX, positionY, floor);
 			}
@@ -199,7 +201,6 @@ public class ParticlePosition extends Position{
 
 	@Override
 	public void onHeadingChange(double heading) {
-		Log.d("MainActivity", "ParticlePosition onHeadingChange()");
 		if(HEADING_CALI){
 			this.heading = heading + headingBias;
 		}else{
@@ -372,6 +373,7 @@ public class ParticlePosition extends Position{
 
 	@Override
 	public void onWirelessPosition(List<PositionProb> list) {
+		Log.d("MainActivity", "ParticlePosition onWirelessPosition()");
 		WiFiList =list;		
 	}
 

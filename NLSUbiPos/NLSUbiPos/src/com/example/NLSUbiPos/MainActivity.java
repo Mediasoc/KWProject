@@ -65,7 +65,9 @@ public class MainActivity extends Activity {
 		position.setBuilding(building);
 		
 		if(wifilocator != null){
-			wifilocator.startLocating(1500, 0);
+			wifilocator.startLocating(200, 0);
+			positionclient.getFloorDetector().addOnFloorListener(wifilocator);
+			Log.d(TAG, "wifiLocator start");
 		}
 		pointLineMapThread t1=new pointLineMapThread();
 		t1.start();
@@ -73,7 +75,6 @@ public class MainActivity extends Activity {
      	th.start();	 
      	
      	positionclient.getFloorDetector().addOnFloorListener(position);
-		positionclient.getFloorDetector().addOnFloorListener(wifilocator);
 		
 		positionclient.getCompass().addOnHeadingChangeListener(position);
 		

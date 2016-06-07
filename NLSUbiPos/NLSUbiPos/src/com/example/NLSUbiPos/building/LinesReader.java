@@ -41,6 +41,7 @@ public class LinesReader {
 			while ((lineText=bufferedReader.readLine()) != null) {
 				String[] coordinates = pattern.split(lineText);
 				if(coordinates.length == 4) {
+					/*
 					// the x coordinate of the start point
 					double x1 = Double.valueOf(coordinates[0]);
 					// the y coordinate of the start point
@@ -49,6 +50,15 @@ public class LinesReader {
 					double x2 = Double.valueOf(coordinates[2]);
 					// the y coordinate of the end point
 					double y2 = Double.valueOf(coordinates[3]);
+					*/
+					// the x coordinate of the start point
+					double x1 = Double.valueOf(coordinates[0]) - 13519000;
+					// the y coordinate of the start point
+					double y1 = Double.valueOf(coordinates[1]) - 3635000;
+					// the x coordinate of the end point
+					double x2 = Double.valueOf(coordinates[2]) - 13519000;
+					// the y coordinate of the end point
+					double y2 = Double.valueOf(coordinates[3]) - 3635000;
 					
 					lines.add(new Line2d(x1, y1, x2, y2));
 				}

@@ -92,7 +92,6 @@ public class WifiLocator extends WirelessLocator implements OnFloorListener {
 		broadcastReceiver = new BroadcastReceiver(){
 			
 			public void onReceive(Context context,Intent intent){
-				System.out.println(888);
 				if(receivedfloor!=0){
 					if(databasestatus.get(receivedfloor-1)==true){
 					scanresults=wifimanager.getScanResults();
@@ -126,7 +125,6 @@ public class WifiLocator extends WirelessLocator implements OnFloorListener {
 				    	 PositionProbList=PositionCounting(3);
 				    	 // PositionInfoTmp = WKNN(3);
 				    	  if(PositionProbList!=null){
-				    		  System.out.println(1);
 				    	  // CurrentLocation.=PositionInfoTmp.x;
 				    	  // CurrentLocation.y=PositionInfoTmp.y;
 				    	   notifyWirelessPosition(PositionProbList);
@@ -176,9 +174,9 @@ public class WifiLocator extends WirelessLocator implements OnFloorListener {
 			timer.cancel();
 			timer = null;
 		}
-		if(broadcastReceiver != null){
-			context.unregisterReceiver(broadcastReceiver);
-		}
+//		if(broadcastReceiver != null){
+//			context.unregisterReceiver(broadcastReceiver);
+//		}
 	}
 
 	private List<databaseRecord> readDataBase(String pathname){
