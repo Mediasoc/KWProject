@@ -17,6 +17,7 @@ import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
+import android.os.Handler;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
@@ -83,8 +84,7 @@ public class ContextTestActivity extends Activity  {
 	     	th.start();	     
 	     	
 	     	//使用线程控制屏幕显示时间
-	     	Thread1 th1=new Thread1();
-	     	th1.start();
+	   handler.postDelayed(runnable, 2000);
 			}
 		});
 		
@@ -96,6 +96,7 @@ public class ContextTestActivity extends Activity  {
 			public void onClick(View v) {
 //				sensorManager.unregisterListener(ContextTestActivity.this);
 				pc.unregisterSensorListener();
+	            handler.removeCallbacks(runnable);
 				startButton.setEnabled(true);
 				stopButton.setEnabled(false);
 				ExitButton.setEnabled(true);
@@ -162,19 +163,16 @@ public class ContextTestActivity extends Activity  {
 	
 	
 	//2s显示一次
-	class Thread1 extends Thread{
-		public void run(){
-			int i=0;
-			for(i=0;i<1000;i++){
-			try{
-				sleep(2000);
-				updateMessage();
-				}
-			catch(Exception e){
-			}
-			}
-		}
-	}
+	Handler handler=new Handler();  
+	Runnable runnable=new Runnable() {  
+	    @Override  
+	    public void run() {  
+	        // TODO Auto-generated method stub  
+	    	updateMessage();
+	        handler.postDelayed(this, 2000);  
+	    }  
+	};  
+
 	
 	
 	

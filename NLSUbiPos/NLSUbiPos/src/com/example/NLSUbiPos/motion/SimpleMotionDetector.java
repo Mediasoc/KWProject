@@ -26,7 +26,7 @@ public class SimpleMotionDetector extends MotionDetector {
 	private float pressuredif;
 	
 	//the instances of weka
-	private Object[] instances;
+	private Double[] instances;
 	
 	/*the motion context of user, 0 means walk, 1 means still, 2 means elevator up,
 	3 means elevator down, 4 means upstairs, 5 means downstairs*/
@@ -39,7 +39,7 @@ public class SimpleMotionDetector extends MotionDetector {
 		amplitude = new float[200];
 		gravitySize = 0;
 		linearaccSize=0;
-		instances = new Double[4];
+		instances = new Double[1];
 		pressureData=new float[100000];
 		pressureSize=0;
 	}
@@ -56,10 +56,7 @@ public class SimpleMotionDetector extends MotionDetector {
 	 
 	 //return the motion context
 	 public int getmotion() {
-//			instances[0] = getMean(gravityData[0], gravitySize);
-//			instances[1] = getMean(gravityData[1], gravitySize);
-//			instances[2] = getMean(gravityData[2], gravitySize);
-//			System.out.println(instances[2]);
+
 			for(int i=0;i<linearaccSize; i++) {
 				amplitude[i] = (float) Math.sqrt(linearaccData[0][i]*linearaccData[0][i] + linearaccData[1][i]*linearaccData[1][i] +
 						linearaccData[2][i]*linearaccData[2][i]);
@@ -71,40 +68,37 @@ public class SimpleMotionDetector extends MotionDetector {
 		    pressuredif=getPredif();
 		   
 		   
-			int cls = -1;
-			
-	   //Get the motion context from  WeKa Classifier		
-			try {
-				cls = (int) MotionClassifier.classify(instances);
-			} catch (Exception e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
+
 	    
 		//use the pressure data to assist the context detection	
-			if (pressuredif>0.07)
-			{motioncontext=3;}     //elevator down
-		    else if (pressuredif<-0.07)
-		     {motioncontext=2;}    //elevator up
-		    else{
+			if (pressuredif>0.06&&instances[0]<0.8)
+			{
+				motioncontext=3;
+				}     //elevator down
+		    else if (pressuredif<-0.06&&instances[0]<0.8)
+		     {
+		    	motioncontext=2;
+		      }    //elevator up
+		    
 			
-			switch (cls) {
-			case 0:
-				if (pressuredif>0.03)
-				{motioncontext=5;}  //downstairs
-			    else if (pressuredif<-0.03)
-			     {motioncontext=4;} //upstairs
-			    else
-				{motioncontext=0;}  //walk
-				break;
-			case 1:
+		    else if (pressuredif>0.025&&instances[0]>0.8)
+				{
+		    	motioncontext=5;
+		    	}  //downstairs
+				
+			else if (pressuredif<-0.025&&instances[0]>0.8)
+			    {
+				motioncontext=4;
+				} //upstairs
+			else if (instances[0]>0.8)
+				{
+				motioncontext=0;
+				}  //walk
+			
+			else{		
 				motioncontext=1;    //still
-				break;
-			
-			default:
-				motioncontext=1;
 			}
-		    }
+		    
 			return motioncontext;
 		}
 	 
@@ -122,11 +116,23 @@ public class SimpleMotionDetector extends MotionDetector {
 
 	 //get difference of pressure data per 60 data
 	 public float getPredif(){
+		    float predif1=0;
+		    float predif2=0;
+		 
 			if (pressureSize<80)
-				 pressuredif=0;
+			{
+				pressuredif=0;
+			}
 			else
-				pressuredif=pressureData[pressureSize-1]-pressureData[pressureSize-61];
+				{
+				predif1=pressureData[pressureSize-1]-pressureData[pressureSize-41];
+				predif2=pressureData[pressureSize-31]-pressureData[pressureSize-71];
+			    
+				pressuredif=(Math.abs(predif1)>Math.abs(predif2))?(predif1):(predif2);
+				}
+			System.out.println(pressuredif);
 			return pressuredif;
+		
 		
 		}
 	 
