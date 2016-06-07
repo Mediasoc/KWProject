@@ -1,7 +1,6 @@
 package com.example.NLSUbiPos.motion;
 
-import java.util.ArrayList;
-import java.util.Calendar;
+
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
@@ -34,13 +33,13 @@ public class SimpleMotionDetector extends MotionDetector {
 
 	//the Constructor of this class
 	public SimpleMotionDetector(){
-		gravityData = new float[3][200];
-		linearaccData = new float[3][200];
-		amplitude = new float[200];
+		gravityData = new float[3][300];
+		linearaccData = new float[3][300];
+		amplitude = new float[300];
 		gravitySize = 0;
 		linearaccSize=0;
 		instances = new Double[1];
-		pressureData=new float[100000];
+		pressureData=new float[100];
 		pressureSize=0;
 	}
 	
@@ -64,29 +63,29 @@ public class SimpleMotionDetector extends MotionDetector {
 			instances[0] = getMean(amplitude, linearaccSize);
 			gravitySize = 0;
 		    linearaccSize = 0;
-//		    pressureSize=0; 
+		    pressureSize=0; 
 		    pressuredif=getPredif();
 		   
 		   
 
 	    
 		//use the pressure data to assist the context detection	
-			if (pressuredif>0.06&&instances[0]<0.8)
+			if (pressuredif>0.08&&instances[0]<0.8)
 			{
 				motioncontext=3;
 				}     //elevator down
-		    else if (pressuredif<-0.06&&instances[0]<0.8)
+		    else if (pressuredif<-0.08&&instances[0]<0.8)
 		     {
 		    	motioncontext=2;
 		      }    //elevator up
 		    
 			
-		    else if (pressuredif>0.025&&instances[0]>0.8)
+		    else if (pressuredif>0.035&&instances[0]>0.8)
 				{
 		    	motioncontext=5;
 		    	}  //downstairs
 				
-			else if (pressuredif<-0.025&&instances[0]>0.8)
+			else if (pressuredif<-0.035&&instances[0]>0.8)
 			    {
 				motioncontext=4;
 				} //upstairs
@@ -116,20 +115,9 @@ public class SimpleMotionDetector extends MotionDetector {
 
 	 //get difference of pressure data per 60 data
 	 public float getPredif(){
-		    float predif1=0;
-		    float predif2=0;
-		 
-			if (pressureSize<80)
-			{
-				pressuredif=0;
-			}
-			else
-				{
-				predif1=pressureData[pressureSize-1]-pressureData[pressureSize-41];
-				predif2=pressureData[pressureSize-31]-pressureData[pressureSize-71];
-			    
-				pressuredif=(Math.abs(predif1)>Math.abs(predif2))?(predif1):(predif2);
-				}
+		   
+		
+		 pressuredif=pressureData[pressureSize-1]-pressureData[pressureSize-75];
 			System.out.println(pressuredif);
 			return pressuredif;
 		
@@ -158,12 +146,12 @@ public class SimpleMotionDetector extends MotionDetector {
 			
 			
 		}
-//		notify the motionEvent per 1s
-		if(linearaccSize>=50&&gravitySize>=50)
+//		notify the motionEvent per 2s
+		if(linearaccSize>=100&&gravitySize>=100&&pressureSize>=80)
 		{
 			int a=getmotion();
 			notifyMotionEvent(a);
-//			System.out.println(a);
+
 		}
 		
 	}
