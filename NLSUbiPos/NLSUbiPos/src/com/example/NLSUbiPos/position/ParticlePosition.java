@@ -3,6 +3,7 @@ package com.example.NLSUbiPos.position;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.OutputStream;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -91,11 +92,13 @@ public class ParticlePosition extends Position{
 			wifiInitializePosition(WiFiList, floor);
 		}else{
 			setPosition(xAverage, yAverage, floor);
+			WiFiList = new ArrayList<PositionProb>();
 		}
 	}
 	
 	@Override
 	public void setPosition(double xAverage, double yAverage, int floor) {
+		Log.d("MainActivity", "ParticlePosition setPosition()");
 		int number = 1;
 		double length;
 		
@@ -138,11 +141,14 @@ public class ParticlePosition extends Position{
 
 	@Override
 	public void onStep(StepEvent event) {
+		Log.d("MainActivity", "ParticlePosition onStep()");
 		stepCount++;
 		stepLength = event.getStepLength();
 		for(Particle particle : particles){
 			particle.motionConfigure(motionLabel, stepLength + stepLengthSpread * NormalDistribution.randn());
-			particle.setWiFiLocation(findNearestAP(particle, WiFiList));
+			if(WiFiAssistance){
+				particle.setWiFiLocation(findNearestAP(particle, WiFiList));
+			}			
 		}
 		HashSet<Particle> livedParticles = new HashSet<Particle>(particles.size());
 		HashSet<Particle> deadParticles = new HashSet<Particle>(particles.size());
@@ -193,6 +199,7 @@ public class ParticlePosition extends Position{
 
 	@Override
 	public void onHeadingChange(double heading) {
+		Log.d("MainActivity", "ParticlePosition onHeadingChange()");
 		if(HEADING_CALI){
 			this.heading = heading + headingBias;
 		}else{
@@ -387,6 +394,7 @@ public class ParticlePosition extends Position{
 
 	@Override
 	public void onMotion(int motion) {
+		Log.d("MainActivity", "ParticlePosition onMotion()");
 		motionLabel = motion;
 		//TODO trigger setPosition() when pedestrian is at elevator and stairs
 		switch(motion){

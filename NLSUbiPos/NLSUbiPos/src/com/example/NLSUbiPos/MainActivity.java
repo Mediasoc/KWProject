@@ -34,26 +34,7 @@ public class MainActivity extends Activity {
 		positionclient=new PositionClient(this);
 		wifilocator=new WifiLocator(this);
 		position=new ParticlePosition(0,0,0);
-		
-		positionclient.getFloorDetector().addOnFloorListener(position);
-		positionclient.getFloorDetector().addOnFloorListener(wifilocator);
-		
-		positionclient.getCompass().addOnHeadingChangeListener(position);
-		
-		positionclient.getStepDetector().addOnStepListener(position);
-		
-		positionclient.getContextDetector().addOnContextListener(position);
-		
-		positionclient.getMotionDetector().addOnMotionListener(position);
-		
-		wifilocator.addOnWirelessPositionListener(position);
-				
-		positionclient.getContextDetector().locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER,500, 1,locationListener);
-		positionclient.getFloorDetector().setinifloor(3);
-		
-		positionclient.registerSensorListener();
-
-	}
+		}
 	
 	@Override
 	protected void onPause(){
@@ -86,8 +67,28 @@ public class MainActivity extends Activity {
 		if(wifilocator != null){
 			wifilocator.startLocating(1500, 0);
 		}
+		pointLineMapThread t1=new pointLineMapThread();
+		t1.start();
 		th=new Thread(new indoordetect());
      	th.start();	 
+     	
+     	positionclient.getFloorDetector().addOnFloorListener(position);
+		positionclient.getFloorDetector().addOnFloorListener(wifilocator);
+		
+		positionclient.getCompass().addOnHeadingChangeListener(position);
+		
+		positionclient.getStepDetector().addOnStepListener(position);
+		
+		positionclient.getContextDetector().addOnContextListener(position);
+		
+		positionclient.getMotionDetector().addOnMotionListener(position);
+		
+		wifilocator.addOnWirelessPositionListener(position);
+				
+		positionclient.getContextDetector().locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER,500, 1,locationListener);
+		positionclient.getFloorDetector().setinifloor(3);
+		
+		positionclient.registerSensorListener();
 	}
 	
 	@Override

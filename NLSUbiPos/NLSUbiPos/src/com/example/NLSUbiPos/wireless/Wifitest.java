@@ -1,15 +1,12 @@
 package com.example.NLSUbiPos.wireless;
 
 
-import com.example.NLSUbiPos.position.ParticlePosition;
 import com.example.NLSUbiPos.position.PositionClient;
 import com.example.NLSUbiPos.position.PositionTest;
 import com.example.fusionnavigation.R;
 
 import android.app.Activity;
 import android.os.Bundle;
-import android.view.Menu;
-import android.view.MenuItem;
 
 public class Wifitest extends Activity {
 	
