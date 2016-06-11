@@ -12,6 +12,8 @@ import com.example.NLSUbiPos.satellite.OnGPSPositionListener;
 import com.example.NLSUbiPos.stepdetecor.OnStepListener;
 import com.example.NLSUbiPos.wireless.OnWirelessPositionListener;
 
+import android.graphics.Canvas;
+
 /**
  * edited by LiuDonghui on 20160415
  *
@@ -55,5 +57,9 @@ OnWirelessPositionListener,OnGPSPositionListener,OnMotionListener {
 	public void onFloor(int floornum){
 		floor=floornum;
 	}
+	
+
+	public abstract void renderPosition(Canvas canvas, float scale);
+	public abstract String getPositionInformation();
 	
 }

@@ -2,6 +2,8 @@ package com.example.NLSUbiPos;
 
 
 import com.example.NLSUbiPos.building.Building;
+import com.example.NLSUbiPos.map.BaseMapView;
+import com.example.NLSUbiPos.map.VectorMapView;
 import com.example.NLSUbiPos.position.ParticlePosition;
 import com.example.NLSUbiPos.position.PositionClient;
 import com.example.NLSUbiPos.wireless.WifiLocator;
@@ -22,6 +24,7 @@ public class MainActivity extends Activity {
 	private PositionClient positionclient;
 	private ParticlePosition position;
 	private WifiLocator wifilocator;
+	private BaseMapView mapView;
 	private Thread th;
 	
 	private Building building;
@@ -59,9 +62,12 @@ public class MainActivity extends Activity {
 		super.onResume();
 		Log.d(TAG, "MainActivity onResume()");
 		
-		building = Building.factory("indoormaps", "wdzl");
+		building = Building.factory("indoormaps", "wdzl3L");
 		building.setCurrentFloorIndex(3);
-		
+		mapView = new VectorMapView(this);
+		mapView.setBuilding(building);
+		mapView.setPositionObject(position);		
+		setContentView(mapView);
 		position.setBuilding(building);
 		
 		if(wifilocator != null){

@@ -20,6 +20,10 @@ import com.example.NLSUbiPos.stepdetecor.StepEvent;
 import com.example.NLSUbiPos.utils.NormalDistribution;
 import com.example.NLSUbiPos.wireless.PositionInfo;
 import com.example.NLSUbiPos.wireless.PositionProb;
+
+import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.Paint;
 import android.location.Location;
 import android.os.Environment;
 import android.util.Log;
@@ -455,5 +459,77 @@ public class ParticlePosition extends Position{
 		}else{
 			Log.d("File save", "External Storage is not available");
 		}
+	}
+	
+	@Override
+	public String getPositionInformation() {
+		return "coordinate:(" + (int)(positionX*1000)/1000.0 + "," + (int)(positionY*1000)/1000.0 +
+				")\nheading:" + (int)(heading * 180 / Math.PI * 100) / 100.0 + "°" + 
+				"\nsteplength:" + (int)(stepLength*1000)/1000.0 + 
+				" \nstepcount:" + stepCount + "\nParticle number:"+particles.size(); 
+	}
+
+	@Override
+	public void renderPosition(Canvas canvas, float scale) {
+		// TODO Auto-generated method stub
+
+		Paint paint = new Paint();
+		// Render the position of the user.
+		renderPositionMark(canvas, paint, scale);
+		// Render the particle cloud around the user.
+		renderParticleCloud(canvas, paint, scale);
+	}
+	
+	/**
+	 * Render the particle cloud around the user.
+	 * @param canvas the Canvas object used to draw
+	 * @param paint the Paint object used to draw
+	 * @param scale how many pixels correspond to one meter
+	 */
+	private void renderParticleCloud(Canvas canvas, Paint paint, float scale) {
+		//paint.setStyle(Paint.Style.FILL);
+		paint.setStyle(Paint.Style.STROKE);
+		paint.setStrokeWidth(2.0f);
+		paint.setColor(Color.BLACK);
+
+		// Draw particles
+		for (Particle particle : particles) {
+			canvas.drawPoint((float)particle.getXCoordinate()*scale, (float)-particle.getYCoordinate()*scale, paint);
+		}
+		
+		// Draw collision set
+		paint.setColor(Color.GREEN);
+		for (Line2d line : workingSet) {
+			// Change the coordinates to pixels
+			float x1 = (float) line.getStartPoint().getX() * scale;
+			float y1 = - (float) line.getStartPoint().getY() * scale;
+			float x2 = (float) line.getEndPoint().getX() * scale;
+			float y2 = - (float) line.getEndPoint().getY() * scale;
+			canvas.drawLine(x1, y1, x2, y2, paint);
+		}
+	}
+	
+	/**
+	 * Render the position of the user.
+	 * @param canvas the Canvas object used to draw
+	 * @param paint the Paint object used to draw
+	 * @param scale how many pixels correspond to one meter
+	 */
+	private void renderPositionMark(Canvas canvas, Paint paint, float scale) {
+		paint.setStyle(Paint.Style.STROKE);
+		paint.setStrokeWidth(4.0f);
+		paint.setColor(Color.RED);
+		
+		float headingInDegree = (float) (heading * 180 / Math.PI);
+		// Change the coordinates to pixels.
+		float markX = (float) (positionX * scale);
+		float markY = (float) (-positionY * scale);
+		canvas.save();
+		canvas.rotate(headingInDegree, markX, markY);
+		// Draw mark circle
+		canvas.drawCircle(markX, markY, 10.0f, paint);
+		// Draw heading
+		canvas.drawLine(markX, markY, markX, markY-40.0f, paint);
+		canvas.restore();
 	}
 }
