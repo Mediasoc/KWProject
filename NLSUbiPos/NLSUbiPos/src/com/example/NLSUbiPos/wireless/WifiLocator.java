@@ -122,9 +122,8 @@ public class WifiLocator extends WirelessLocator implements OnFloorListener {
 				    	  sortPositionProbList();
 				    	 
 				    	 PositionProbList=PositionCounting(3);
-				    	 // PositionInfoTmp = WKNN(3);
+//				    	  PositionInfoTmp = WKNN(3);
 				    	  if(PositionProbList!=null){
-				    		  System.out.println(1);
 				    	  // CurrentLocation.=PositionInfoTmp.x;
 				    	  // CurrentLocation.y=PositionInfoTmp.y;
 				    	   notifyWirelessPosition(PositionProbList);

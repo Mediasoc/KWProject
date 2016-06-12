@@ -54,12 +54,15 @@ OnWirelessPositionListener,OnGPSPositionListener,OnMotionListener {
 		CurrentGPSLocation.y=mercator.y;
 	}
 	*/
-	public void onFloor(int floornum){
-		floor=floornum;
-	}
-	
 
 	public abstract void renderPosition(Canvas canvas, float scale);
 	public abstract String getPositionInformation();
+	
+	@Override
+	public void onFloor(int floor) {
+		// TODO Auto-generated method stub
+		building.setCurrentFloorIndex(floor);
+		this.floor = floor;
+	}
 	
 }

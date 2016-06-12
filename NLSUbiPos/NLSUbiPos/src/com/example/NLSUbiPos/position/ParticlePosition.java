@@ -356,11 +356,11 @@ public class ParticlePosition extends Position{
 	}
 	
 	private boolean WiFiAssisted(Particle particle){
-		double dist = Math.sqrt((particle.getXCoordinate() - particle.getWiFiLocation().x) * 
+		double dist = (particle.getXCoordinate() - particle.getWiFiLocation().x) * 
 				(particle.getXCoordinate() - particle.getWiFiLocation().x) + 
 				(particle.getYCoordinate() - particle.getWiFiLocation().y) * 
-				(particle.getYCoordinate() - particle.getWiFiLocation().y));
-		if(dist > 3){
+				(particle.getYCoordinate() - particle.getWiFiLocation().y);
+		if(dist > 4){
 			return false;
 		}else{
 			return true;
@@ -377,8 +377,12 @@ public class ParticlePosition extends Position{
 
 	@Override
 	public void onWirelessPosition(List<PositionProb> list) {
-		Log.d("MainActivity", "ParticlePosition onWirelessPosition()");
-		WiFiList =list;		
+		Log.d("MainActivity", "ParticlePosition onWirelessPosition() "+list.size());
+		WiFiList = new ArrayList<PositionProb>();
+		for(int i=0;i<3;i++){
+			WiFiList.add(list.get(i));	
+		}	
+		
 	}
 
 	private PositionInfo findNearestAP(Particle particle, List<PositionProb> list){
@@ -405,16 +409,30 @@ public class ParticlePosition extends Position{
 		//TODO trigger setPosition() when pedestrian is at elevator and stairs
 		switch(motion){
 		case 2://elevator up
-//			setPosition();
+			setPosition(99,759,floor);
 			break;		
 		case 3://elevator down
-//			setPosition();
+			setPosition(99,759,floor);
 			break;
 		case 4://upstairs
-//			setPosition();
+			if((92.7-positionX)*(92.7-positionX)+(760-positionY)*(760-positionY)>
+			(105-positionX)*(105-positionX)+(750-positionY)*(750-positionY)){
+				//eastern stairs
+				setPosition(105,750,floor);
+			}else{
+				//western stairs
+				setPosition(92.7,760,floor);
+			}
 			break;
 		case 5://downstairs
-//			setPosition();
+			if((92.7-positionX)*(92.7-positionX)+(760-positionY)*(760-positionY)>
+			(105-positionX)*(105-positionX)+(750-positionY)*(750-positionY)){
+				//eastern stairs
+				setPosition(105,750,floor);
+			}else{
+				//western stairs
+				setPosition(92.7,760,floor);
+			}
 			break;
 		}
 	}
@@ -532,4 +550,6 @@ public class ParticlePosition extends Position{
 		canvas.drawLine(markX, markY, markX, markY-40.0f, paint);
 		canvas.restore();
 	}
+
+
 }

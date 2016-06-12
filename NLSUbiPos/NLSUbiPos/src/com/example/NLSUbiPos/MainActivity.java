@@ -10,6 +10,7 @@ import com.example.NLSUbiPos.wireless.WifiLocator;
 import com.example.fusionnavigation.R;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
@@ -36,7 +37,7 @@ public class MainActivity extends Activity {
 //		setContentView(R.layout.activity_main);
 		positionclient=new PositionClient(this);
 		wifilocator=new WifiLocator(this);
-		position=new ParticlePosition(0,0,0);
+		position=new ParticlePosition(100,750,3);
 		}
 	
 	@Override
@@ -62,7 +63,7 @@ public class MainActivity extends Activity {
 		super.onResume();
 		Log.d(TAG, "MainActivity onResume()");
 		
-		building = Building.factory("indoormaps", "wdzl3L");
+		building = Building.factory("indoormaps", "wdzl_all");
 		building.setCurrentFloorIndex(3);
 		mapView = new VectorMapView(this);
 		mapView.setBuilding(building);
@@ -121,8 +122,9 @@ public class MainActivity extends Activity {
 		// Handle action bar item clicks here. The action bar will
 		// automatically handle clicks on the Home/Up button, so long
 		// as you specify a parent activity in AndroidManifest.xml.
-		int id = item.getItemId();
-		if (id == R.id.action_settings) {
+		switch (item.getItemId()) {
+		case R.id.set_position:
+			mapView.setSettingPosition(true);
 			return true;
 		}
 		return super.onOptionsItemSelected(item);
