@@ -68,8 +68,6 @@ public class WifiLocator extends WirelessLocator implements OnFloorListener {
 	
 	public  PositionInfo PositionInfoTmp = new PositionInfo();
 
-	BroadcastReceiver broadcastReceiver;
-	
 	/**
 	 * Constructs a WiFi locator.
 	 * 
@@ -89,9 +87,10 @@ public class WifiLocator extends WirelessLocator implements OnFloorListener {
 		database3=readDataBase("/sdcard/Fingerprint/Data/database_F3.txt");databasestatus.set(2, true);
 		database4=readDataBase("/sdcard/Fingerprint/Data/database_F4.txt");databasestatus.set(3, true);
 		//register wifi receiver
-		broadcastReceiver = new BroadcastReceiver(){
+		context.registerReceiver(new BroadcastReceiver(){
 			
 			public void onReceive(Context context,Intent intent){
+				System.out.println(888);
 				if(receivedfloor!=0){
 					if(databasestatus.get(receivedfloor-1)==true){
 					scanresults=wifimanager.getScanResults();
@@ -125,6 +124,7 @@ public class WifiLocator extends WirelessLocator implements OnFloorListener {
 				    	 PositionProbList=PositionCounting(3);
 				    	 // PositionInfoTmp = WKNN(3);
 				    	  if(PositionProbList!=null){
+				    		  System.out.println(1);
 				    	  // CurrentLocation.=PositionInfoTmp.x;
 				    	  // CurrentLocation.y=PositionInfoTmp.y;
 				    	   notifyWirelessPosition(PositionProbList);
@@ -141,8 +141,7 @@ public class WifiLocator extends WirelessLocator implements OnFloorListener {
 			}
 			
 			
-		};
-		context.registerReceiver(broadcastReceiver,new IntentFilter(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION));
+		}, new IntentFilter(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION));
 		
 		     
 	}
@@ -174,9 +173,6 @@ public class WifiLocator extends WirelessLocator implements OnFloorListener {
 			timer.cancel();
 			timer = null;
 		}
-//		if(broadcastReceiver != null){
-//			context.unregisterReceiver(broadcastReceiver);
-//		}
 	}
 
 	private List<databaseRecord> readDataBase(String pathname){
@@ -661,11 +657,23 @@ public class WifiLocator extends WirelessLocator implements OnFloorListener {
 
 		@Override
 		public void onFloor(int floor) {
-			// TODO 自动生成的方法存根
 			receivedfloor=floor;
 			
 			if(receivedfloor!=0&&currentfloor!=receivedfloor){
-				database=database3;
+				switch(receivedfloor){
+				case 1:
+					database=database1;
+					break;
+				case 2:
+					database=database2;
+					break;
+				case 3:
+					database=database3;
+					break;
+				case 4:
+					database=database4;
+					break;
+				}
 			}
 			currentfloor=receivedfloor;
 		}
