@@ -87,6 +87,8 @@ public class ParticlePosition extends Position{
 	
 	private Collection<Line2d> workingSet = new HashSet<Line2d>();
 	
+	private Boolean WiFiable;
+	
 	public ParticlePosition(double xAverage, double yAverage, int floor){
 		Log.d("MainActivity", "ParticlePosition start");
 		numberOfParticles = DEFAULT_PARTICLE_COUNT;
@@ -97,6 +99,7 @@ public class ParticlePosition extends Position{
 			setPosition(xAverage, yAverage, floor);
 			WiFiList = new ArrayList<PositionProb>();
 		}
+		WiFiable = Boolean.valueOf("false");
 //		CurrentWiFiLocation = new PositionInfo();
 	}
 	
@@ -145,12 +148,13 @@ public class ParticlePosition extends Position{
 
 	@Override
 	public void onStep(StepEvent event) {
+		//TODO
 		Log.d("MainActivity", "ParticlePosition onStep()");
 		stepCount++;
 		stepLength = event.getStepLength();
 		for(Particle particle : particles){
 			particle.motionConfigure(motionLabel, stepLength + stepLengthSpread * NormalDistribution.randn());
-			if(WiFiAssistance){
+			if(WiFiAssistance && WiFiable){
 				particle.setWiFiLocation(findNearestAP(particle, WiFiList));
 			}			
 		}
@@ -168,7 +172,7 @@ public class ParticlePosition extends Position{
 							CurrentGPSLocation, GPSAccuracy * 2);
 				}
 			}
-			if(WiFiAssistance){
+			if(WiFiAssistance && WiFiable){
 				particleLive = updateParticle(particle, heading) && WiFiAssisted(particle);
 			}else{
 				particleLive = updateParticle(particle, heading);
@@ -189,7 +193,7 @@ public class ParticlePosition extends Position{
 				}else{
 					setPosition(CurrentGPSLocation.getX(), CurrentGPSLocation.getY(),floor);
 				}
-			}else if(WiFiAssistance){
+			}else if(WiFiAssistance && WiFiable){
 				wifiInitializePosition(WiFiList, floor);
 //				setPosition((CurrentWiFiLocation.x+positionX)/2, (CurrentWiFiLocation.y+positionY)/2, floor);
 			}else{
@@ -378,8 +382,10 @@ public class ParticlePosition extends Position{
 
 	@Override
 	public void onWirelessPosition(List<PositionProb> list, Boolean flag) {
+		//TODO
 		Log.d("MainActivity", "ParticlePosition onWirelessPosition() "+list.size());
 		WiFiList = new ArrayList<PositionProb>();
+		WiFiable = flag;
 //		CurrentWiFiLocation =new PositionInfo();
 		for(int i=0;i<3;i++){
 			WiFiList.add(list.get(i));
@@ -409,7 +415,6 @@ public class ParticlePosition extends Position{
 	public void onMotion(int motion) {
 		Log.d("MainActivity", "ParticlePosition onMotion()");
 		motionLabel = motion;
-		//TODO trigger setPosition() when pedestrian is at elevator and stairs
 		switch(motion){
 		case 2://elevator up
 			setPosition(99,759,floor);
@@ -492,8 +497,6 @@ public class ParticlePosition extends Position{
 
 	@Override
 	public void renderPosition(Canvas canvas, float scale) {
-		// TODO Auto-generated method stub
-
 		Paint paint = new Paint();
 		// Render the position of the user.
 		renderPositionMark(canvas, paint, scale);

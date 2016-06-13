@@ -57,7 +57,6 @@ public class WifiLocator extends WirelessLocator implements OnFloorListener {
 		databasestatus.add(false);
 	}
 	
-	
 	//record the input wifi signal
 	public  List<inputRecord> record=new ArrayList<inputRecord>();
 	
