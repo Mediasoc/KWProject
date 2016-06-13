@@ -14,5 +14,5 @@ public interface OnWirelessPositionListener {
 	 * Called when the wireless access point position is available.
 	 * @param coordinate the coordinate of the access point
 	 */
-	public void onWirelessPosition(List<PositionProb> list);
+	public void onWirelessPosition(List<PositionProb> list,Boolean able);
 }

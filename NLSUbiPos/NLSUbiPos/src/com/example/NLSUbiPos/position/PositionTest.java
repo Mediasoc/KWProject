@@ -66,18 +66,9 @@ OnWirelessPositionListener,OnGPSPositionListener,OnMotionListener {
 	}
 
 	@Override
-	public void onWirelessPosition(List<PositionProb> list) {
+	public void onWirelessPosition(List<PositionProb> list,Boolean able) {
 		// TODO Auto-generated method stub
-		x=0;
-		y=0;
-		if(list!=null){
-		for(int i=0;i<list.size();i++){
-			x+=list.get(i).aPositionInfo.x*list.get(i).prob;
-			y+=list.get(i).aPositionInfo.y*list.get(i).prob;
-		}
-		}
-		System.out.println(x);
-		System.out.println(y);
+		
 	}
 
 }

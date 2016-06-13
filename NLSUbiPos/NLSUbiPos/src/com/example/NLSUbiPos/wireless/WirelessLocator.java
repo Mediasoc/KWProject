@@ -28,6 +28,8 @@ public abstract class WirelessLocator {
 	// the OnWirelessPositionListener list
 	private ArrayList<OnWirelessPositionListener> onWirelessPositionListeners;
 	
+	protected Boolean WiFiable;
+	
 	// the application context which is used for system functions
 	protected Context context;
 	
@@ -85,9 +87,9 @@ public abstract class WirelessLocator {
 	 * It invokes all the callback methods in the registered listeners. 
 	 * @param coordinate the coordinate of the access point which accords with some conditions
 	 */
-	public void notifyWirelessPosition(List<PositionProb> list) {
+	public void notifyWirelessPosition(List<PositionProb> list,Boolean able) {
 		for (OnWirelessPositionListener listener : onWirelessPositionListeners) {
-			listener.onWirelessPosition(list);
+			listener.onWirelessPosition(list,able);
 		}
 	}
 	
