@@ -97,7 +97,7 @@ public class ParticlePosition extends Position{
 			setPosition(xAverage, yAverage, floor);
 			WiFiList = new ArrayList<PositionProb>();
 		}
-		CurrentWiFiLocation = new PositionInfo();
+//		CurrentWiFiLocation = new PositionInfo();
 	}
 	
 	@Override
@@ -151,7 +151,7 @@ public class ParticlePosition extends Position{
 		for(Particle particle : particles){
 			particle.motionConfigure(motionLabel, stepLength + stepLengthSpread * NormalDistribution.randn());
 			if(WiFiAssistance){
-				particle.setWiFiLocation(CurrentWiFiLocation);
+				particle.setWiFiLocation(findNearestAP(particle, WiFiList));
 			}			
 		}
 		HashSet<Particle> livedParticles = new HashSet<Particle>(particles.size());
@@ -190,8 +190,8 @@ public class ParticlePosition extends Position{
 					setPosition(CurrentGPSLocation.getX(), CurrentGPSLocation.getY(),floor);
 				}
 			}else if(WiFiAssistance){
-//				wifiInitializePosition(WiFiList, floor);
-				setPosition((CurrentWiFiLocation.x+positionX)/2, (CurrentWiFiLocation.y+positionY)/2, floor);
+				wifiInitializePosition(WiFiList, floor);
+//				setPosition((CurrentWiFiLocation.x+positionX)/2, (CurrentWiFiLocation.y+positionY)/2, floor);
 			}else{
 				setPosition(positionX, positionY, floor);
 			}
@@ -377,14 +377,14 @@ public class ParticlePosition extends Position{
 	}
 
 	@Override
-	public void onWirelessPosition(List<PositionProb> list,Boolean able) {
+	public void onWirelessPosition(List<PositionProb> list) {
 		Log.d("MainActivity", "ParticlePosition onWirelessPosition() "+list.size());
 		WiFiList = new ArrayList<PositionProb>();
-		CurrentWiFiLocation =new PositionInfo();
+//		CurrentWiFiLocation =new PositionInfo();
 		for(int i=0;i<3;i++){
 			WiFiList.add(list.get(i));
-			CurrentWiFiLocation.x += list.get(i).aPositionInfo.x * list.get(i).prob;
-			CurrentWiFiLocation.y += list.get(i).aPositionInfo.y * list.get(i).prob;
+//			CurrentWiFiLocation.x += list.get(i).aPositionInfo.x * list.get(i).prob;
+//			CurrentWiFiLocation.y += list.get(i).aPositionInfo.y * list.get(i).prob;
 		}	
 	}
 

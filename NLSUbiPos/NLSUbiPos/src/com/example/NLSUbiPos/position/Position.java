@@ -33,7 +33,7 @@ OnWirelessPositionListener,OnGPSPositionListener,OnMotionListener {
 	
 	protected double positionY;
 	
-	protected PositionInfo CurrentWiFiLocation;
+//	protected PositionInfo CurrentWiFiLocation;
 	protected Mercator CurrentGPSLocation;
 	
 	protected int floor;

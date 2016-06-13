@@ -1,11 +1,4 @@
 package com.example.NLSUbiPos.satellite;
-/**
- * this class is an extend class of GPSLocator which use Gaode Location API to do outdoor location
- * @author WZ
- */
-import java.util.Timer;
-import java.util.TimerTask;
-
 import android.content.Context;
 import android.location.Location;
 import android.os.Handler;
