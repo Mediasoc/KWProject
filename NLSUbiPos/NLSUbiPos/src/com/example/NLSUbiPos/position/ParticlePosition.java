@@ -361,11 +361,11 @@ public class ParticlePosition extends Position{
 	}
 	
 	private boolean WiFiAssisted(Particle particle){
-		double dist = (particle.getXCoordinate() - particle.getWiFiLocation().x) * 
-				(particle.getXCoordinate() - particle.getWiFiLocation().x) + 
-				(particle.getYCoordinate() - particle.getWiFiLocation().y) * 
-				(particle.getYCoordinate() - particle.getWiFiLocation().y);
-		if(dist > 25){
+		double dist = (particle.getXCoordinate() - particle.getWiFiLocation().aPositionInfo.x) * 
+				(particle.getXCoordinate() - particle.getWiFiLocation().aPositionInfo.x) + 
+				(particle.getYCoordinate() - particle.getWiFiLocation().aPositionInfo.y) * 
+				(particle.getYCoordinate() - particle.getWiFiLocation().aPositionInfo.y);
+		if(dist > 2.5/particle.getWiFiLocation().prob){
 			return false;
 		}else{
 			return true;
@@ -394,9 +394,9 @@ public class ParticlePosition extends Position{
 		}	
 	}
 
-	private PositionInfo findNearestAP(Particle particle, List<PositionProb> list){
+	private PositionProb findNearestAP(Particle particle, List<PositionProb> list){
 		double dist = Integer.MAX_VALUE;
-		PositionInfo minDistAP = null;
+		PositionProb minDistAP = null;
 		double tempDist = 0;
 		for(PositionProb pos : list){
 			tempDist = Math.sqrt((particle.getXCoordinate() - pos.aPositionInfo.x) * 
@@ -404,7 +404,7 @@ public class ParticlePosition extends Position{
 					(particle.getYCoordinate() - pos.aPositionInfo.y) * 
 					(particle.getYCoordinate() - pos.aPositionInfo.y));
 			if(tempDist <= dist){
-				minDistAP = pos.aPositionInfo;
+				minDistAP = pos;
 				dist = tempDist;
 			}
 		}

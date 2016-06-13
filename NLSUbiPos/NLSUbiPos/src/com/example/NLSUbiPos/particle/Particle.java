@@ -1,9 +1,7 @@
 package com.example.NLSUbiPos.particle;
 
-import java.util.Random;
-
 import com.example.NLSUbiPos.utils.NormalDistribution;
-import com.example.NLSUbiPos.wireless.PositionInfo;
+import com.example.NLSUbiPos.wireless.PositionProb;
 
 public class Particle implements Cloneable{
 	
@@ -19,7 +17,7 @@ public class Particle implements Cloneable{
 	
 	private int ID;
 	
-	private PositionInfo wifiPosition;
+	private PositionProb wifiPosition;
 	
 	public Particle(double xCoordinate, double yCoordinate, int floor, double bias, double stepLength, int ID){
 		this.xCoordinate = xCoordinate;
@@ -28,7 +26,7 @@ public class Particle implements Cloneable{
 		this.headingBias = bias;
 		this.stepLength = stepLength;
 		this.ID = ID;
-		this.wifiPosition = new PositionInfo();
+		this.wifiPosition = new PositionProb();
 	}
 	
 	public static Particle circleNormalDistribution(double xAverage, double yAverage, int floor, double radiusSigma, double heading, double biasSTD, double stepLength, int ID){
@@ -128,7 +126,7 @@ public class Particle implements Cloneable{
 		return ID;
 	}
 	
-	public PositionInfo getWiFiLocation(){
+	public PositionProb getWiFiLocation(){
 		return wifiPosition;
 	}
 	
@@ -156,7 +154,7 @@ public class Particle implements Cloneable{
 		this.ID = id;
 	}
 	
-	public void setWiFiLocation(PositionInfo pos){
+	public void setWiFiLocation(PositionProb pos){
 		this.wifiPosition = pos;
 	}
 
