@@ -5,7 +5,7 @@ import java.util.Calendar;
 import com.example.NLSUbiPos.position.ParticlePosition;
 import com.example.NLSUbiPos.position.Position;
 import com.example.NLSUbiPos.position.PositionClient;
-import com.example.fusionnavigation.R;
+import com.example.NLSUbiPos.R;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;

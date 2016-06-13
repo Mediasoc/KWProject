@@ -11,6 +11,7 @@ import com.example.NLSUbiPos.motion.OnMotionListener;
 import com.example.NLSUbiPos.satellite.OnGPSPositionListener;
 import com.example.NLSUbiPos.stepdetecor.OnStepListener;
 import com.example.NLSUbiPos.wireless.OnWirelessPositionListener;
+import com.example.NLSUbiPos.wireless.PositionInfo;
 
 import android.graphics.Canvas;
 
@@ -31,8 +32,10 @@ OnWirelessPositionListener,OnGPSPositionListener,OnMotionListener {
 	protected double positionX;
 	
 	protected double positionY;
-//	protected Mercator CurrentWiFiLocation;
+	
+	protected PositionInfo CurrentWiFiLocation;
 	protected Mercator CurrentGPSLocation;
+	
 	protected int floor;
 
 	public abstract void setPosition(double positionX, double positionY, int floor);

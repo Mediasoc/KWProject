@@ -3,7 +3,7 @@ package com.example.NLSUbiPos.wireless;
 
 import com.example.NLSUbiPos.position.PositionClient;
 import com.example.NLSUbiPos.position.PositionTest;
-import com.example.fusionnavigation.R;
+import com.example.NLSUbiPos.R;
 
 import android.app.Activity;
 import android.os.Bundle;

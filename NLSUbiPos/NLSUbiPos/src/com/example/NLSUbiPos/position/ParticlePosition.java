@@ -91,13 +91,13 @@ public class ParticlePosition extends Position{
 		Log.d("MainActivity", "ParticlePosition start");
 		numberOfParticles = DEFAULT_PARTICLE_COUNT;
 		stepCount = 0;
-		
 		if(WiFiAssistance && WiFiList != null){
 			wifiInitializePosition(WiFiList, floor);
 		}else{
 			setPosition(xAverage, yAverage, floor);
 			WiFiList = new ArrayList<PositionProb>();
 		}
+		CurrentWiFiLocation = new PositionInfo();
 	}
 	
 	@Override
@@ -151,7 +151,7 @@ public class ParticlePosition extends Position{
 		for(Particle particle : particles){
 			particle.motionConfigure(motionLabel, stepLength + stepLengthSpread * NormalDistribution.randn());
 			if(WiFiAssistance){
-				particle.setWiFiLocation(findNearestAP(particle, WiFiList));
+				particle.setWiFiLocation(CurrentWiFiLocation);
 			}			
 		}
 		HashSet<Particle> livedParticles = new HashSet<Particle>(particles.size());
@@ -190,7 +190,8 @@ public class ParticlePosition extends Position{
 					setPosition(CurrentGPSLocation.getX(), CurrentGPSLocation.getY(),floor);
 				}
 			}else if(WiFiAssistance){
-				wifiInitializePosition(WiFiList, floor);
+//				wifiInitializePosition(WiFiList, floor);
+				setPosition((CurrentWiFiLocation.x+positionX)/2, (CurrentWiFiLocation.y+positionY)/2, floor);
 			}else{
 				setPosition(positionX, positionY, floor);
 			}
@@ -360,7 +361,7 @@ public class ParticlePosition extends Position{
 				(particle.getXCoordinate() - particle.getWiFiLocation().x) + 
 				(particle.getYCoordinate() - particle.getWiFiLocation().y) * 
 				(particle.getYCoordinate() - particle.getWiFiLocation().y);
-		if(dist > 4){
+		if(dist > 25){
 			return false;
 		}else{
 			return true;
@@ -379,10 +380,12 @@ public class ParticlePosition extends Position{
 	public void onWirelessPosition(List<PositionProb> list) {
 		Log.d("MainActivity", "ParticlePosition onWirelessPosition() "+list.size());
 		WiFiList = new ArrayList<PositionProb>();
+		CurrentWiFiLocation =new PositionInfo();
 		for(int i=0;i<3;i++){
-			WiFiList.add(list.get(i));	
+			WiFiList.add(list.get(i));
+			CurrentWiFiLocation.x += list.get(i).aPositionInfo.x * list.get(i).prob;
+			CurrentWiFiLocation.y += list.get(i).aPositionInfo.y * list.get(i).prob;
 		}	
-		
 	}
 
 	private PositionInfo findNearestAP(Particle particle, List<PositionProb> list){

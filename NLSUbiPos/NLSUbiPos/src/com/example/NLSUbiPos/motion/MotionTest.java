@@ -2,7 +2,7 @@ package com.example.NLSUbiPos.motion;
 
 
 import com.example.NLSUbiPos.position.PositionClient;
-import com.example.fusionnavigation.R;
+import com.example.NLSUbiPos.R;
 
 
 import android.app.Activity;

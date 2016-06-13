@@ -3,7 +3,7 @@ import com.example.NLSUbiPos.floor.*;
 import com.example.NLSUbiPos.motion.SimpleMotionDetector;
 
 import java.util.Calendar;
-import com.example.fusionnavigation.R;
+import com.example.NLSUbiPos.R;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;

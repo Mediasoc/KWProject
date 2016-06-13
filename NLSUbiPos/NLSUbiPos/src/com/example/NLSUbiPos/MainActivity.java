@@ -7,7 +7,7 @@ import com.example.NLSUbiPos.map.VectorMapView;
 import com.example.NLSUbiPos.position.ParticlePosition;
 import com.example.NLSUbiPos.position.PositionClient;
 import com.example.NLSUbiPos.wireless.WifiLocator;
-import com.example.fusionnavigation.R;
+import com.example.NLSUbiPos.R;
 
 import android.app.Activity;
 import android.content.Intent;
