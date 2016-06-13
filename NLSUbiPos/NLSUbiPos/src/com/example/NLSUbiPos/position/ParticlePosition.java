@@ -101,6 +101,7 @@ public class ParticlePosition extends Position{
 		}
 		WiFiable = Boolean.valueOf("false");
 //		CurrentWiFiLocation = new PositionInfo();
+		CurrentPosition = new Mercator(0,0);
 	}
 	
 	@Override
@@ -323,6 +324,8 @@ public class ParticlePosition extends Position{
 		}
 		positionX = sumX / particles.size();
 		positionY = sumY / particles.size();
+		CurrentPosition.setX(positionX + 13519000);
+		CurrentPosition.setY(positionY + 3635000);
 	}
 	
 	private void computeMeanBias(){
@@ -555,6 +558,10 @@ public class ParticlePosition extends Position{
 		// Draw heading
 		canvas.drawLine(markX, markY, markX, markY-40.0f, paint);
 		canvas.restore();
+	}
+	
+	public Lonlat getLonlatPosition(){
+		return CurrentPosition.mercatortolonlat();
 	}
 
 
