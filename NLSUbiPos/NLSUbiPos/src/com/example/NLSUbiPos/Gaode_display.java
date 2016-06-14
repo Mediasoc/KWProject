@@ -50,7 +50,7 @@ public class Gaode_display extends Activity {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		Log.d(TAG, "MainActivity onCreate()");
-		setContentView(R.layout.activity_main);
+		setContentView(R.layout.activity_gaode_display);
 		 mapview=(MapView)findViewById(R.id.map);
 		 mapview.onCreate(savedInstanceState);
 		 
@@ -98,8 +98,7 @@ public class Gaode_display extends Activity {
 			positionclient.getFloorDetector().addOnFloorListener(wifilocator);
 			Log.d(TAG, "wifiLocator start");
 		}
-		pointLineMapThread t1=new pointLineMapThread();
-		t1.start();
+		
 		th=new Thread(new indoordetect());
      	th.start();	 
      	
@@ -187,29 +186,6 @@ private LocationListener locationListener=new LocationListener() {
     	
     }
 	
-	class pointLineMapThread extends Thread{
-		@Override
-		public void run(){
-			amap.clear();
-			
-			
-			if(x!=0&&y!=0){				
-				mercatorposition=new Mercator(x,y);
-				lonlatposition=mercatorposition.mercatortolonlat();
-				options=new MarkerOptions();
-				options.position(new LatLng(lonlatposition.getlat(),lonlatposition.getlon()));
-				options.title("当前位置");
-				amap.addMarker(options);
-				CameraUpdate update = CameraUpdateFactory.newLatLngZoom(new LatLng(lonlatposition.getlat(),lonlatposition.getlon()), 19);
-				 amap.moveCamera(update);
-			}
-			try {
-				sleep(1000);
-			} catch (InterruptedException e) {
-				// TODO 自动生成的 catch 块
-				e.printStackTrace();
-			}
-		}
-	}
+	
 
 }
