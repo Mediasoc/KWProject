@@ -64,7 +64,7 @@ public class Gaode_display extends Activity {
 		 
 		positionclient=new PositionClient(this);
 		wifilocator=new WifiLocator(this);
-		position=new ParticlePosition(0,0,0);
+		position=new ParticlePosition(100,750,3);
 		
 		CameraUpdate update = CameraUpdateFactory.newLatLngZoom(new LatLng(31.023,121.44), 19);
 		 amap.moveCamera(update);
@@ -106,7 +106,8 @@ public class Gaode_display extends Activity {
 			positionclient.getFloorDetector().addOnFloorListener(wifilocator);
 			Log.d(TAG, "wifiLocator start");
 		}
-		
+		pointLineMapThread t1=new pointLineMapThread();
+		t1.start();
 		th=new Thread(new indoordetect());
      	th.start();	 
      	start();
@@ -200,6 +201,15 @@ private LocationListener locationListener=new LocationListener() {
 		}
     	
     }
+	
+	class pointLineMapThread extends Thread{
+		@Override
+		public void run(){
+			if(building !=null){				
+				Building.pointLinesMap(building);
+			}
+		}
+	}
 	public void start(){
 		timer=new Timer();
 		timertask=new TimerTask(){
@@ -224,7 +234,7 @@ private LocationListener locationListener=new LocationListener() {
 			}
 			
 		};
-		timer.schedule(timertask,0,3000);
+		timer.schedule(timertask,0,1000);
 	}
 	
 	public void stop() {
