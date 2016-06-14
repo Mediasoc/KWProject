@@ -1,5 +1,8 @@
 package com.example.NLSUbiPos;
 
+import java.util.Timer;
+import java.util.TimerTask;
+
 import com.amap.api.maps.AMap;
 import com.amap.api.maps.CameraUpdate;
 import com.amap.api.maps.CameraUpdateFactory;
@@ -18,6 +21,7 @@ import com.example.NLSUbiPos.position.PositionClient;
 import com.example.NLSUbiPos.wireless.WifiLocator;
 import com.example.NLSUbiPos.R;
 
+
 import android.app.Activity;
 import android.location.Location;
 import android.location.LocationListener;
@@ -35,7 +39,8 @@ public class Gaode_display extends Activity {
 	private MapView mapview;
 	private AMap amap;
 	private Thread th;
-	
+	private Timer timer;
+	private TimerTask timertask;
 	private Lonlat lonlatposition;
 	private Mercator mercatorposition;
 	private MarkerOptions options;
@@ -68,6 +73,8 @@ public class Gaode_display extends Activity {
 	@Override
 	protected void onPause(){
 		super.onPause();
+		mapview.onPause();
+		
 		Log.d(TAG, "MainActivity onPause()");
 		positionclient.unregisterSensorListener();
 		positionclient.getCompass().removeOnHeadingChangeListeners();
@@ -86,9 +93,10 @@ public class Gaode_display extends Activity {
 	@Override
 	protected void onResume(){
 		super.onResume();
+		mapview.onResume();
 		Log.d(TAG, "MainActivity onResume()");
 		
-		building = Building.factory("indoormaps", "wdzl3L");
+		building = Building.factory("indoormaps", "wdzl_all");
 		building.setCurrentFloorIndex(3);
 		
 		position.setBuilding(building);
@@ -101,6 +109,7 @@ public class Gaode_display extends Activity {
 		
 		th=new Thread(new indoordetect());
      	th.start();	 
+     	start();
      	
      	positionclient.getFloorDetector().addOnFloorListener(position);
 		
@@ -129,6 +138,12 @@ public class Gaode_display extends Activity {
 	@Override
 	protected void onDestroy() {
 		super.onDestroy();
+		mapview.onDestroy();
+	}
+	protected void onSaveInstanceState(Bundle outState){
+		super.onSaveInstanceState(outState);
+		mapview.onSaveInstanceState(outState);
+		
 	}
 
 	@Override
@@ -185,6 +200,40 @@ private LocationListener locationListener=new LocationListener() {
 		}
     	
     }
+	public void start(){
+		timer=new Timer();
+		timertask=new TimerTask(){
+
+			@Override
+			public void run() {
+				// TODO 自动生成的方法存根
+				amap.clear();
+				
+				if(x!=0&&y!=0){
+					System.out.println(123);
+					mercatorposition=new Mercator(x,y);
+					lonlatposition=mercatorposition.mercatortolonlat();
+					options=new MarkerOptions();
+					options.position(new LatLng(lonlatposition.getlat()-0.000108,lonlatposition.getlon()-0.00006));
+					options.title("当前位置");
+					amap.addMarker(options);
+					CameraUpdate update = CameraUpdateFactory.newLatLngZoom(new LatLng(lonlatposition.getlat(),lonlatposition.getlon()), 19);
+					 amap.moveCamera(update);
+				}
+				
+			}
+			
+		};
+		timer.schedule(timertask,0,3000);
+	}
+	
+	public void stop() {
+		if (timer != null) {
+			// cancels the scanning task
+			timer.cancel();
+			timer = null;
+		}
+	}
 	
 	
 

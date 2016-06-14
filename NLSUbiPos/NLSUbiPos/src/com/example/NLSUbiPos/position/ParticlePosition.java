@@ -89,10 +89,13 @@ public class ParticlePosition extends Position{
 	
 	private Boolean WiFiable;
 	
+	private Mercator CurrentPosition;
+	
 	public ParticlePosition(double xAverage, double yAverage, int floor){
 		Log.d("MainActivity", "ParticlePosition start");
 		numberOfParticles = DEFAULT_PARTICLE_COUNT;
 		stepCount = 0;
+		CurrentPosition = new Mercator(0,0);
 		if(WiFiAssistance && WiFiList != null){
 			wifiInitializePosition(WiFiList, floor);
 		}else{
@@ -101,7 +104,7 @@ public class ParticlePosition extends Position{
 		}
 		WiFiable = Boolean.valueOf("false");
 //		CurrentWiFiLocation = new PositionInfo();
-		CurrentPosition = new Mercator(0,0);
+		
 	}
 	
 	@Override
