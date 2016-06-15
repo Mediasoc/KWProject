@@ -65,11 +65,11 @@ public class WifiLocator extends WirelessLocator implements OnFloorListener {
 	RssMacList rssmaclist=new RssMacList();
 	public List<PositionProb> PositionProbList;
 	
-	//public List<PositionProb> PositionProbList_tmp;
+	public List<PositionProb> PositionProbList_tmp;
 	
 	public List<PositionProb> PositionProbList_simple;
 	
-	public  PositionInfo PositionInfoTmp = new PositionInfo();
+//	public  PositionInfo PositionInfoTmp = new PositionInfo();
 	
 	
 
@@ -126,13 +126,14 @@ public class WifiLocator extends WirelessLocator implements OnFloorListener {
 				    	  PositionProbList=getPositionProbList(rssmaclist);
 				    	  
 				    	  sortPositionProbList();
-				    	 
-				    	 PositionProbList_simple=PositionCounting(3);
+				    	 PositionProbList_tmp=new ArrayList<PositionProb>();
+				    	 PositionProbList_tmp=PositionCounting(3);
+				    	 Log.d("WiFI", "PositionProbList_tmp: "+PositionProbList_tmp.get(0).prob);
 //				    	  PositionInfoTmp = WKNN(3);
-				    	  if(PositionProbList_simple!=null){
+				    	  if(PositionProbList_tmp!=null){
 				    	  // CurrentLocation.=PositionInfoTmp.x;
 				    	  // CurrentLocation.y=PositionInfoTmp.y;
-				    	   notifyWirelessPosition(PositionProbList_simple,WiFiable);
+				    	   notifyWirelessPosition(PositionProbList_tmp,WiFiable);
 				    	  //System.out.println(CurrentLocation.x);
 				    	  }
 				    	   
@@ -625,7 +626,10 @@ public class WifiLocator extends WirelessLocator implements OnFloorListener {
 		
 		List<PositionProb> PositionCounting(int Number){
 			int num=Number;
+			PositionInfo PositionInfoTmp = new PositionInfo();
+			PositionProb PositionProbTmp=new PositionProb();
 			WiFiable=false;
+			
 			if(PositionProbList.size() == 0)
 			{
 				// error return PositionProbList==null
@@ -634,8 +638,8 @@ public class WifiLocator extends WirelessLocator implements OnFloorListener {
 			}
 			//List<PositionProb> PositionProbList=new ArrayList<PositionProb>();
 			PositionProbList_simple=new ArrayList<PositionProb>();
-			PositionInfo PositionInfoTmp = new PositionInfo();
-			PositionProb PositionProbTmp=new PositionProb();
+			
+			
 			double probCount = 0;
 			int PositionProbListIndex ;
 			for(PositionProbListIndex = 0 ; PositionProbListIndex < PositionProbList.size()&&PositionProbListIndex < num;PositionProbListIndex++)
@@ -651,6 +655,8 @@ public class WifiLocator extends WirelessLocator implements OnFloorListener {
 				}
 				*/
 				for (int j=0;j<num;j++){
+					PositionInfoTmp = new PositionInfo();
+					PositionProbTmp = new PositionProb();
 					PositionInfoTmp.x = (PositionProbList.get(j).aPositionInfo.x);
 					PositionInfoTmp.y = (PositionProbList.get(j).aPositionInfo.y);
 					PositionInfoTmp.z = (PositionProbList.get(j).aPositionInfo.z);
@@ -658,16 +664,18 @@ public class WifiLocator extends WirelessLocator implements OnFloorListener {
 					
 					PositionProbTmp.aPositionInfo=PositionInfoTmp;
 					PositionProbTmp.prob=PositionProbList.get(j).prob/probCount;
+					Log.d("WiFi", j+"th PositionProbTmp.prob: "+PositionProbTmp.prob);
 					PositionProbList_simple.add(PositionProbTmp);
+					
 				}
 			}else{
 				return null;
 			}
 			
-			if(PositionProbList_simple.get(0).prob>0.65){
+			if(PositionProbList_simple.get(0).prob>0.5){
 				WiFiable=true;
 			}
-			
+			Log.d("WiFi", "PositionProbList_simple: "+PositionProbList_simple.get(0).prob);
 			return PositionProbList_simple;
 		}
 
