@@ -63,7 +63,7 @@ public class ParticlePosition extends Position{
 	
 	private boolean STEP_CALI = true;
 	
-	private boolean HEADING_CALI = true;
+	private boolean HEADING_CALI = false;
 	
 	private double headingBias = 0.0;
 	
