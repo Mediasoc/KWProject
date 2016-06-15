@@ -18,6 +18,7 @@ import android.net.wifi.WifiManager.WifiLock;
  
  //the number of WiFi AccessPoints
  private int wifiN;
+ private int strongN;
  
  //the average of the square of RSSI
  private double wifiE2;
@@ -70,6 +71,16 @@ import android.net.wifi.WifiManager.WifiLock;
 		return wifiE;
  }
  
+ public int GetStrongWifiNumber()
+ {
+	 for (ScanResult sr:mWifiList){
+		 if(sr.level>-70){
+				strongN++;
+			}
+		}
+		
+		return strongN;
+ }
  //return the standard deviation of RSSI
  public double GetWifiStd(){
 	 wifiStd =Math.sqrt(wifiE2-wifiE*wifiE);

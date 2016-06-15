@@ -36,6 +36,8 @@ public class IODetector extends ContextDetector {
 	//the number of WiFi aps 
 	private int wifiN;
 	
+	private int wifistrongN;
+	
 	//the standard deviation of wifi rssi
 	private double wifistd;
 	
@@ -76,15 +78,17 @@ public class IODetector extends ContextDetector {
                 Iterator<GpsSatellite> iters = gpsStatus.getSatellites().iterator();
                 double E=0;
                 int count = 0;
+                maxSNR=0;
                 while (iters.hasNext() && count <= maxSatellites) {     
                     GpsSatellite s = iters.next();
                     if(s.usedInFix()){
                     E+=s.getSnr();
-                    count++;    } 
+               
                     if (s.getSnr() > maxSNR){
-		        		   maxSNR = (int) s.getSnr();	
-		        	   }   
-//                    System.out.println(maxSNR);
+		        		   maxSNR = s.getSnr();	
+		        	   } 
+                    count++;  
+                    }
                 }   
                 if (count==0) GPSSNR=0;
                 else GPSSNR=E/count;
@@ -111,7 +115,7 @@ public class IODetector extends ContextDetector {
 					wifiN=wa.GetWifiNumber();
 					wifimean=wa.GetWifiMean();
 					wifistd=wa.GetWifiStd();
-//					iocontext=GetIOcontext();
+					wifistrongN=wa.GetStrongWifiNumber();
 					notifyContextEvent(GetIOcontext());
 //					 System.out.println(GetIOcontext());
 				} catch (InterruptedException e) {
@@ -132,21 +136,25 @@ public class IODetector extends ContextDetector {
 	
 	 public int GetIOcontext(){
 	
-		if(la.GetLight()>1000)
-		   {
-			iocontext=0; 
-			}
-		else if (GPSSNR<16||maxSNR<28||GPSN<7)
-		   {
-			iocontext=1;
-			}
-		else if (wifiN*0.11+wifimean*-0.07524+wifistd*-0.12+GPSN*-0.59+GPSSNR*-0.14>-9.82)
-		   {
-			iocontext=1;
-			}
-		else
-		{ iocontext=0;}
-	    return iocontext;		
+			if (GPSSNR<19||GPSN<6||maxSNR<28)
+			   {
+				iocontext=1;
+				}
+			else if (GPSSNR>25)
+			   {
+				iocontext=0;
+				}
+			
+			else if (GPSSNR>23&&wifistrongN<5&&GPSN>6)
+			   {
+				iocontext=0;
+				}
+			
+			else
+			{ 
+				iocontext=2;
+				}
+		    return iocontext;	
 	}
 	
 	//another method of indoor detect using confidence level

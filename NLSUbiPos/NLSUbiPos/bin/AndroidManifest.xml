@@ -44,7 +44,7 @@
             </intent-filter>
         </activity> -->
         
-        <activity
+       <!--  <activity
             android:name="com.example.NLSUbiPos.Gaode_display"
             android:label="地图展示" >
             <intent-filter>
@@ -52,7 +52,7 @@
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-        </activity>
+        </activity> -->
        
 
         <!--
@@ -75,7 +75,16 @@
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-        </activity> -->
+        </activity> -->
+         <activity
+            android:name="com.example.NLSUbiPos.context.IndoorCheck"
+            android:label="室内外感知" >
+             <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
         
 
 
@@ -92,8 +101,8 @@
         -->
 
 
-		<service android:name="com$example$NLSUbiPos$context$IODetectorServive" >
-		</service><!--
+	<!-- 	<service android:name="com$example$NLSUbiPos$context$IODetectorServive" >
+		</service> --><!--
         <activity
             android:name="com$example$NLSUbiPos$wireless$Wifitest"
             android:label="@string/title_activity_wifitest" >

@@ -216,6 +216,9 @@ public class ContextTestActivity extends Activity  {
 		case(1):
 			t="Indoor";
 		    break;
+		case(2):
+			t="buffer area";
+		    break;
 		}
 		
 		System.out.println(t);
