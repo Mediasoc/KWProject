@@ -69,7 +69,7 @@ public class ParticlePosition extends Position{
 	
 	private boolean GPSAssistance = false;
 	
-	private boolean WiFiAssistance = false;
+	private boolean WiFiAssistance = true;
 	
 	private int GPSCredibility = 3;
 	

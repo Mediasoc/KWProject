@@ -26,7 +26,7 @@ public class MainActivity extends Activity {
 	private PositionClient positionclient;
 	private ParticlePosition position;
 	private WifiLocator wifilocator;
-	private GaodeLocator gaodelocator;
+//	private GaodeLocator gaodelocator;
 	private BaseMapView mapView;
 	private Thread th;
 	
@@ -40,7 +40,7 @@ public class MainActivity extends Activity {
 		positionclient=new PositionClient(this);
 		wifilocator=new WifiLocator(this);
 		position=new ParticlePosition(100,750,3);
-		gaodelocator = new GaodeLocator(this);
+//		gaodelocator = new GaodeLocator(this);
 		}
 	
 	@Override
@@ -59,12 +59,12 @@ public class MainActivity extends Activity {
 			wifilocator.stopLocating();		
 			Log.d(TAG, "wifiLocator stop");
 		}
-		
+/*		
 		if(gaodelocator != null){
 			gaodelocator.removeOnGPSPositionListener();
 			gaodelocator.stopLocating();
 			Log.d(TAG, "GaodeLocator stop");
-		}
+		}*/
 	}
 	
 	@Override
@@ -85,11 +85,12 @@ public class MainActivity extends Activity {
 			positionclient.getFloorDetector().addOnFloorListener(wifilocator);
 			Log.d(TAG, "wifiLocator start");
 		}
+		/*
 		if(gaodelocator != null){
 			gaodelocator.startlocating();
 			gaodelocator.addOnGPSPositionListener(position);
 		}
-		
+		*/
 		pointLineMapThread t1=new pointLineMapThread();
 		t1.start();
 		th=new Thread(new indoordetect());
