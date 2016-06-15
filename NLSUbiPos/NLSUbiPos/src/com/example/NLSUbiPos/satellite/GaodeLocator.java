@@ -63,7 +63,7 @@ public class GaodeLocator extends GPSLocator implements AMapLocationListener {
 	}
 	
 	//interval control the frequency the location result is sent
-	public void startlocating(long interval){
+	public void startlocating(){
 		//设置NtripSetting
     	WzNtripSetting ntripSetting = new WzNtripSetting("ntrip.qxwz.com",8001,DEFAULT_MOUNTPOINT,DEFAULT_FORMAT,"P_LDHQXWZ1","5efe0d6");
         //设置WzChipDiffConfig
@@ -104,7 +104,13 @@ public class GaodeLocator extends GPSLocator implements AMapLocationListener {
 		
 //		timer.schedule(timerTask, 0,interval);
 	}
-	
+	public void stopLocating(){
+    	Log.d("WzOutLocator", "stopLocating");
+    	if(mWzOutLocationManager != null){
+    		mWzOutLocationManager.removeUpdates(mWzOutLocationListener);
+    		mWzOutLocationManager.close();
+    	}
+    }
 		
 	@Override
 	public void onLocationChanged(AMapLocation location) {
