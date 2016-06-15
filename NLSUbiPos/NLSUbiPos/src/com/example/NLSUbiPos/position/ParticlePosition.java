@@ -371,7 +371,7 @@ public class ParticlePosition extends Position{
 				(particle.getXCoordinate() - particle.getWiFiLocation().aPositionInfo.x) + 
 				(particle.getYCoordinate() - particle.getWiFiLocation().aPositionInfo.y) * 
 				(particle.getYCoordinate() - particle.getWiFiLocation().aPositionInfo.y);
-		if(dist > 2.5/particle.getWiFiLocation().prob){
+		if(dist > (4/particle.getWiFiLocation().prob) * (4/particle.getWiFiLocation().prob)){
 			return false;
 		}else{
 			return true;
