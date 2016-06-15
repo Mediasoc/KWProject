@@ -389,7 +389,7 @@ public class ParticlePosition extends Position{
 	@Override
 	public void onWirelessPosition(List<PositionProb> list, Boolean flag) {
 		//TODO
-		Log.d("MainActivity", "ParticlePosition onWirelessPosition() "+list.size());
+		Log.d("MainActivity", "ParticlePosition onWirelessPosition() "+list.size()+" Prob: "+list.get(0).prob+" "+list.get(1).prob+" "+list.get(2).prob);
 		WiFiList = new ArrayList<PositionProb>();
 		WiFiable = flag;
 //		CurrentWiFiLocation =new PositionInfo();
