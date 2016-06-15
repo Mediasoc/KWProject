@@ -638,7 +638,7 @@ public class WifiLocator extends WirelessLocator implements OnFloorListener {
 			PositionProb PositionProbTmp=new PositionProb();
 			double probCount = 0;
 			int PositionProbListIndex ;
-			for(PositionProbListIndex = 0 ; PositionProbListIndex < PositionProbList.size();PositionProbListIndex++)
+			for(PositionProbListIndex = 0 ; PositionProbListIndex < PositionProbList.size()&&PositionProbListIndex < num;PositionProbListIndex++)
 			{
 				probCount += PositionProbList.get(PositionProbListIndex).prob;
 				
@@ -646,10 +646,10 @@ public class WifiLocator extends WirelessLocator implements OnFloorListener {
 			
 			if(probCount!=0){
 				//normalization
-				for(int i=0;i<PositionProbList.size();i++){
+			/*	for(int i=0;i<PositionProbList.size();i++){
 					PositionProbList.get(i).prob=PositionProbList.get(i).prob/probCount;
 				}
-				
+				*/
 				for (int j=0;j<num;j++){
 					PositionInfoTmp.x = (PositionProbList.get(j).aPositionInfo.x);
 					PositionInfoTmp.y = (PositionProbList.get(j).aPositionInfo.y);
@@ -657,13 +657,14 @@ public class WifiLocator extends WirelessLocator implements OnFloorListener {
 					PositionInfoTmp.o = (PositionProbList.get(j).aPositionInfo.o);
 					
 					PositionProbTmp.aPositionInfo=PositionInfoTmp;
-					PositionProbTmp.prob=PositionProbList.get(j).prob;
+					PositionProbTmp.prob=PositionProbList.get(j).prob/probCount;
 					PositionProbList_simple.add(PositionProbTmp);
 				}
 			}else{
 				return null;
 			}
-			if(PositionProbList_simple.get(0).prob>0.6){
+			
+			if(PositionProbList_simple.get(0).prob>0.65){
 				WiFiable=true;
 			}
 			
