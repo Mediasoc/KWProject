@@ -34,7 +34,7 @@ public class AreaModel {
 	private HashMap<Point2d, Set<Line2d>> pointLinesMap;
 	
 	// the length of side of the grid or the square
-	private final double gridSize = 1.0f;
+	private final double gridSize = 2.0f;
 	
 	/**
 	 * Default constructor. Initializes the Sets and HashMap.

@@ -30,14 +30,16 @@ public abstract class BaseMapView extends SurfaceView implements SurfaceHolder.C
 	// the Position object will tell the renderer how to draw the user position on the map
 	protected Position position;
 	
-	// the pixel of the x coordinate of the map's origin
-	protected float originX = 0.0f;
-	
-	// the pixel of the y coordinate of the map's origin
-	protected float originY = 0.0f;
-	
 	// how many pixels represent one meter
 	protected float scale = 20.0f;
+	
+	// the pixel of the x coordinate of the map's origin
+	protected float originX = -100.0f * scale;
+	
+	// the pixel of the y coordinate of the map's origin
+	protected float originY = 750.0f * scale;
+	
+	
 	
 	// the Building object which represents the map
 	protected Building building = null;
