@@ -69,7 +69,7 @@ public class PressureFloorDetector extends FloorDetector {
 	//return floor number
 	public int getFloor() {
 		pressureSize=0;
-		int a=(int) ((currentpressure-pressureList.get(0))/0.4);
+		int a=(int) ((currentpressure-pressureList.get(0))/0.35);
 		floornum=initialfloor-a;
 //		floornum=3;
 		return floornum;
