@@ -7,6 +7,7 @@ import com.example.NLSUbiPos.map.VectorMapView;
 import com.example.NLSUbiPos.position.ParticlePosition;
 import com.example.NLSUbiPos.position.PositionClient;
 import com.example.NLSUbiPos.satellite.GaodeLocator;
+import com.example.NLSUbiPos.satellite.PhoneGPSLocator;
 import com.example.NLSUbiPos.wireless.WifiLocator;
 import com.example.NLSUbiPos.R;
 
@@ -27,6 +28,7 @@ public class MainActivity extends Activity {
 	private ParticlePosition position;
 	private WifiLocator wifilocator;
 //	private GaodeLocator gaodelocator;
+	private PhoneGPSLocator gpsLocator;
 	private BaseMapView mapView;
 	private Thread th;
 	
@@ -41,6 +43,7 @@ public class MainActivity extends Activity {
 		wifilocator=new WifiLocator(this);
 		position=new ParticlePosition(100,750,3);
 //		gaodelocator = new GaodeLocator(this);
+		gpsLocator = new PhoneGPSLocator(this);
 		}
 	
 	@Override
@@ -65,6 +68,11 @@ public class MainActivity extends Activity {
 			gaodelocator.stopLocating();
 			Log.d(TAG, "GaodeLocator stop");
 		}*/
+		if(gpsLocator != null){
+			gpsLocator.removeOnGPSPositionListener();
+			gpsLocator.stopLocating();
+			Log.d(TAG, "gpsLocator stop");
+		}
 	}
 	
 	@Override
@@ -91,6 +99,10 @@ public class MainActivity extends Activity {
 			gaodelocator.addOnGPSPositionListener(position);
 		}
 		*/
+		if(gpsLocator != null){
+			gpsLocator.startLocating();
+			gpsLocator.addOnGPSPositionListener(position);
+		}
 		pointLineMapThread t1=new pointLineMapThread();
 		t1.start();
 		th=new Thread(new indoordetect());

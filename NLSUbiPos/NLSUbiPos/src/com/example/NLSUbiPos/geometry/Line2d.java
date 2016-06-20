@@ -1,5 +1,6 @@
 package com.example.NLSUbiPos.geometry;
 
+
 /**
  * This class is a representation of a line segment on the 2-dimensional plane.
  */
@@ -93,7 +94,7 @@ public class Line2d {
 		double minY = Math.min(startPoint.getY(), endPoint.getY());
 		double maxY = Math.max(startPoint.getY(), endPoint.getY());
 		
-		return (minX<=point.getX() && point.getX()<=maxX && minY<=point.getY() && point.getY()<=maxY);
+		return	(minX==maxX || minX<=point.getX() && point.getX()<=maxX) && (minY==maxY || minY<=point.getY() && point.getY()<=maxY);
 	}
 	
 	// reference to http://en.wikipedia.org/wiki/Line-line_intersection
