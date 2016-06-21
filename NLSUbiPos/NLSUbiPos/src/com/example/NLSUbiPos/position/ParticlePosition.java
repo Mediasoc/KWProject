@@ -359,7 +359,7 @@ public class ParticlePosition extends Position{
 			GPSAccuracy = location.getAccuracy();
 		else
 			GPSAccuracy = Integer.MAX_VALUE;
-		GPSCredibility = (int)(5/GPSAccuracy);
+		GPSCredibility = (int)(8/GPSAccuracy);
 		Log.d("MainActivity", "GPSAccuracy: "+GPSAccuracy+" GPSCredibility: "+GPSCredibility);
 		if(location.hasBearing())
 			GPSBearing = location.getBearing() * Math.PI / 180;
