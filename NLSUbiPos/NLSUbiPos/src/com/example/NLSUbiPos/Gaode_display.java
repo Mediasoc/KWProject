@@ -150,7 +150,7 @@ public class Gaode_display extends Activity {
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		// Inflate the menu; this adds items to the action bar if it is present.
-		getMenuInflater().inflate(R.menu.main, menu);
+		getMenuInflater().inflate(R.menu.main_1, menu);
 		return true;
 	}
 
@@ -160,9 +160,23 @@ public class Gaode_display extends Activity {
 		// automatically handle clicks on the Home/Up button, so long
 		// as you specify a parent activity in AndroidManifest.xml.
 		int id = item.getItemId();
-		if (id == R.id.action_settings) {
+		if (id == R.id.floor_settings_1) {
+			positionclient.getFloorDetector().setinifloor(1);
 			return true;
 		}
+		if (id == R.id.floor_settings_2) {
+			positionclient.getFloorDetector().setinifloor(2);
+			return true;
+		}
+		if (id == R.id.floor_settings_3) {
+			positionclient.getFloorDetector().setinifloor(3);
+			return true;
+		}
+		if (id == R.id.floor_settings_4) {
+			positionclient.getFloorDetector().setinifloor(4);
+			return true;
+		}
+		
 		return super.onOptionsItemSelected(item);
 	}
 	

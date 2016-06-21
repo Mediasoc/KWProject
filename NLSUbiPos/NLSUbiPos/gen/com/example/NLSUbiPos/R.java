@@ -36,6 +36,10 @@ public final class R {
         public static final int Stopbutton=0x7f08000e;
         public static final int action_settings=0x7f080015;
         public static final int edittext=0x7f080004;
+        public static final int floor_settings_1=0x7f080016;
+        public static final int floor_settings_2=0x7f080017;
+        public static final int floor_settings_3=0x7f080018;
+        public static final int floor_settings_4=0x7f080019;
         public static final int freq=0x7f08000a;
         public static final int hint=0x7f080003;
         public static final int iocontext=0x7f080010;
@@ -64,6 +68,7 @@ public final class R {
     }
     public static final class menu {
         public static final int main=0x7f070000;
+        public static final int main_1=0x7f070001;
     }
     public static final class string {
         public static final int action_settings=0x7f050002;

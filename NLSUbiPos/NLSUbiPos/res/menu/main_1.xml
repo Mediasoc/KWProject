@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:context="com.NLSUbiPos.Gaode_display" >
+    
+     <item
+        android:id="@+id/floor_settings_1"
+        android:orderInCategory="100"
+        android:showAsAction="never"
+        android:title="F1"/>
+    <item
+        android:id="@+id/floor_settings_2"
+        android:orderInCategory="101"
+        android:title="F2"
+        android:showAsAction="never"/>
+    
+    <item
+        android:id="@+id/floor_settings_3"
+        android:orderInCategory="102"
+        android:showAsAction="never"
+        android:title="F3"/>
+    
+    <item
+        android:id="@+id/floor_settings_4"
+        android:orderInCategory="103"
+        android:showAsAction="never"
+        android:title="F4"/>
+    
+
+</menu>
