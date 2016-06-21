@@ -83,7 +83,7 @@ public class ParticlePosition extends Position{
 	
 	private List<PositionProb> WiFiList;
 	
-	private int motionLabel = 0;
+	public int motionLabel = 0;
 	
 	private int contextLabel = -1;
 	

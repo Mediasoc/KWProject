@@ -238,7 +238,10 @@ private LocationListener locationListener=new LocationListener() {
 					//mercatorposition=new Mercator(x,y);
 					//lonlatposition=mercatorposition.mercatortolonlat();
 					options=new MarkerOptions();
-					options.position(new LatLng(position.getLonlatPosition().getlat(),position.getLonlatPosition().getlon()));
+					if(position.motionLabel==2||position.motionLabel==3){
+						options.position(new LatLng(31.023090,121.444127));}
+					else{
+					options.position(new LatLng(position.getLonlatPosition().getlat(),position.getLonlatPosition().getlon()));}
 					options.title("当前位置");
 					amap.addMarker(options);
 					CameraUpdate update = CameraUpdateFactory.newLatLngZoom(new LatLng(position.getLonlatPosition().getlat(),position.getLonlatPosition().getlon()), 19);
@@ -248,7 +251,7 @@ private LocationListener locationListener=new LocationListener() {
 			}
 			
 		};
-		timer.schedule(timertask,0,1000);
+		timer.schedule(timertask,0,500);
 	}
 	
 	public void stop() {
