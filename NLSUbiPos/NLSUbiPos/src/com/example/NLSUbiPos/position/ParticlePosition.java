@@ -69,6 +69,8 @@ public class ParticlePosition extends Position{
 	
 	private boolean GPSAssistance = false;
 	
+	private boolean onGPSChanged = false;
+	
 	private boolean WiFiAssistance = true;
 	
 	private int GPSCredibility = 3;
@@ -96,6 +98,7 @@ public class ParticlePosition extends Position{
 		numberOfParticles = DEFAULT_PARTICLE_COUNT;
 		stepCount = 0;
 		CurrentPosition = new Mercator(0,0);
+		CurrentGPSLocation = new Mercator(0,0);
 		if(WiFiAssistance && WiFiList != null){
 			wifiInitializePosition(WiFiList, floor);
 		}else{
@@ -209,7 +212,7 @@ public class ParticlePosition extends Position{
 		computeCloudAverage();
 		computeMeanBias();
 		
-		savePositionData(event.getTimestamp(), positionX, positionY, floor, heading, WiFiList, motionLabel, contextLabel);
+//		savePositionData(event.getTimestamp(), positionX, positionY, floor, heading, WiFiList, motionLabel, contextLabel);
 	}
 
 	@Override
@@ -236,7 +239,9 @@ public class ParticlePosition extends Position{
 		switch(context){
 		case(0):
 //			t="Outdoor";
-			GPSAssistance = true;
+			if(onGPSChanged){
+				GPSAssistance = true;
+			}
 			WiFiAssistance = false;
 			break;
 		case(1):
@@ -340,14 +345,22 @@ public class ParticlePosition extends Position{
 
 	@Override
 	public void onGPSPosition(Location location) {
+		if(!onGPSChanged){
+			onGPSChanged = true;
+		}
     	CurrentLonlatLocation = new Lonlat(location.getLongitude(),location.getLatitude());
     	//coordinate convert
 		CurrentGPSLocation = CurrentLonlatLocation.lonlattomercator();
+		CurrentGPSLocation.setX(CurrentGPSLocation.getX() - 13519000);
+		CurrentGPSLocation.setY(CurrentGPSLocation.getY() - 3635000);
+		Log.d("MainActivity", "CurrentGPSLocation: ("+CurrentGPSLocation.getX()+", "+
+		CurrentGPSLocation.getY()+")");
 		if(location.hasAccuracy())
 			GPSAccuracy = location.getAccuracy();
 		else
 			GPSAccuracy = Integer.MAX_VALUE;
 		GPSCredibility = (int)(5/GPSAccuracy);
+		Log.d("MainActivity", "GPSAccuracy: "+GPSAccuracy+" GPSCredibility: "+GPSCredibility);
 		if(location.hasBearing())
 			GPSBearing = location.getBearing() * Math.PI / 180;
 		else

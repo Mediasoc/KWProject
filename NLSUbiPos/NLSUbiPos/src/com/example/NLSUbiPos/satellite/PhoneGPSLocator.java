@@ -10,6 +10,7 @@ import android.location.LocationManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
+import android.util.Log;
 
 public class PhoneGPSLocator extends GPSLocator{
 
@@ -19,9 +20,11 @@ public class PhoneGPSLocator extends GPSLocator{
 	public PhoneGPSLocator(Context context){
 		this.context = context;
 		locationManager = (LocationManager)context.getSystemService(Context.LOCATION_SERVICE);
+		Log.d("MainActivity", "PhoneGPSLocator onCreate");
 	}
 	
 	public void startLocating(){
+		Log.d("MainActivity", "PhoneGPSLocator startLocating");
 		if(locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)){
 			getLocation();
 		}else{
@@ -47,9 +50,10 @@ public class PhoneGPSLocator extends GPSLocator{
 		@Override
 		public void onLocationChanged(Location location) {
 			// TODO Auto-generated method stub
+			Log.d("MainActivity", "onLocationChanged");
 			if(location != null){
 				notifyGPSPosition(location);
-			}
+			}	
 		}
 
 		@Override
@@ -73,6 +77,7 @@ public class PhoneGPSLocator extends GPSLocator{
 	};
 	
 	private void toggleGPS() {
+		Log.d("MainActivty", "toggleGPS");
 		Intent gpsIntent = new Intent();
 		gpsIntent.setClassName("com.android.settings", "com.android.settings.widget.SettingsAppWidgetProvider");
 		gpsIntent.addCategory("android.intent.category.ALTERNATIVE");
@@ -86,10 +91,11 @@ public class PhoneGPSLocator extends GPSLocator{
 		}
 	
 	private void getLocation(){
+		Log.d("MainActivity", "PhoneGPSLocator getLocation");
 		mLocation = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
-		if(mLocation == null){
+//		if(mLocation == null){
 			locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 1000, 0, locationListener);
-		}
+//		}
 	}
 
 }

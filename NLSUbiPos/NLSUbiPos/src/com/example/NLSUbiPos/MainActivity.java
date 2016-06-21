@@ -43,6 +43,7 @@ public class MainActivity extends Activity {
 		wifilocator=new WifiLocator(this);
 		position=new ParticlePosition(100,750,3);
 //		gaodelocator = new GaodeLocator(this);
+
 		gpsLocator = new PhoneGPSLocator(this);
 		}
 	
@@ -90,6 +91,7 @@ public class MainActivity extends Activity {
 		
 		if(wifilocator != null){
 			wifilocator.startLocating(200, 0);
+			wifilocator.addOnWirelessPositionListener(position);
 			positionclient.getFloorDetector().addOnFloorListener(wifilocator);
 			Log.d(TAG, "wifiLocator start");
 		}
@@ -102,6 +104,7 @@ public class MainActivity extends Activity {
 		if(gpsLocator != null){
 			gpsLocator.startLocating();
 			gpsLocator.addOnGPSPositionListener(position);
+			Log.d(TAG, "GPSLocator start");
 		}
 		pointLineMapThread t1=new pointLineMapThread();
 		t1.start();
@@ -117,8 +120,6 @@ public class MainActivity extends Activity {
 		positionclient.getContextDetector().addOnContextListener(position);
 		
 		positionclient.getMotionDetector().addOnMotionListener(position);
-		
-		wifilocator.addOnWirelessPositionListener(position);
 				
 		positionclient.getContextDetector().locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER,500, 1,locationListener);
 		positionclient.getFloorDetector().setinifloor(3);
