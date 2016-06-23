@@ -6,6 +6,7 @@ import com.example.NLSUbiPos.context.ContextDetector;
 import com.example.NLSUbiPos.context.IODetector;
 import com.example.NLSUbiPos.floor.FloorDetector;
 import com.example.NLSUbiPos.floor.PressureFloorDetector;
+import com.example.NLSUbiPos.heading.AHRSCompass;
 import com.example.NLSUbiPos.heading.Compass;
 import com.example.NLSUbiPos.heading.GyroCompass;
 import com.example.NLSUbiPos.motion.MotionDetector;
@@ -38,6 +39,7 @@ public class PositionClient {
 		this.context=context;
 		stepdetector=new MovingAverageStepDetector();
 		compass=new GyroCompass();
+//		compass=new AHRSCompass();
 		//added by wl
 		floordetector=new PressureFloorDetector();
 		contextdetector=new IODetector(context);
