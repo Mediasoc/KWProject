@@ -673,7 +673,7 @@ public class WifiLocator extends WirelessLocator implements OnFloorListener {
 				return null;
 			}
 			
-			if(currentfloor==3 && PositionProbList_simple.get(0).prob>0.5){
+			if(currentfloor==3 && PositionProbList_simple.get(0).prob>0.3){
 				WiFiable=true;
 			}
 			
