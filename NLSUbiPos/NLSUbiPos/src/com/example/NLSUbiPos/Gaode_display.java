@@ -64,9 +64,9 @@ public class Gaode_display extends Activity {
 		 
 		positionclient=new PositionClient(this);
 		wifilocator=new WifiLocator(this);
-		position=new ParticlePosition(56.95,727.32,3);
+		position=new ParticlePosition(111.14,776.27,3);
 		
-		CameraUpdate update = CameraUpdateFactory.newLatLngZoom(new LatLng(31.023,121.44), 20);
+		CameraUpdate update = CameraUpdateFactory.newLatLngZoom(new LatLng(31.023,121.44), 19);
 		 amap.moveCamera(update);
 		}
 	
@@ -238,13 +238,13 @@ private LocationListener locationListener=new LocationListener() {
 					//mercatorposition=new Mercator(x,y);
 					//lonlatposition=mercatorposition.mercatortolonlat();
 					options=new MarkerOptions();
-					if(position.motionLabel==2||position.motionLabel==3){
+					if(position.motionLabel==3||position.motionLabel==2){
 						options.position(new LatLng(31.023090,121.444127));}
 					else{
 					options.position(new LatLng(position.getLonlatPosition().getlat(),position.getLonlatPosition().getlon()));}
 					options.title("当前位置");
 					amap.addMarker(options);
-					CameraUpdate update = CameraUpdateFactory.newLatLngZoom(new LatLng(position.getLonlatPosition().getlat(),position.getLonlatPosition().getlon()), 20);
+					CameraUpdate update = CameraUpdateFactory.newLatLngZoom(new LatLng(position.getLonlatPosition().getlat(),position.getLonlatPosition().getlon()), 19);
 					 amap.moveCamera(update);
 				}
 				

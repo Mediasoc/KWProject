@@ -71,6 +71,13 @@ public class PressureFloorDetector extends FloorDetector {
 		pressureSize=0;
 		int a=(int) ((currentpressure-pressureList.get(0))/0.35);
 		floornum=initialfloor-a;
+		
+		if(floornum<1){
+			floornum=1;
+		}
+		if(floornum>4){
+			floornum=4;
+		}
 //		floornum=3;
 		return floornum;
 	}

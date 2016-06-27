@@ -32,7 +32,7 @@ public class Mercator {
 		double x=this.getX()/20037508.34*180;
 		double y=this.getY()/20037508.34*180;
 		y=180/Math.PI*(2*Math.atan(Math.exp(y*Math.PI/180))-Math.PI/2);
-		x=x-0.00006;
+		x=x-0.00003;
 		y=y-0.000108;
 		Lonlat a=new Lonlat(x,y);
 		return a;

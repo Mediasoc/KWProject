@@ -80,7 +80,7 @@ public class GyroCompass extends Compass {
 		// gets the heading vector in the world coordinate
 		Vector3d headingVector = Matrix.rotate(worldBase.transpose(), new Vector3d(0,1,0));
 		// gets the angle from the world north to the direction of the device's y axis
-		heading = Math.atan2(headingVector.getValue(0), headingVector.getValue(1));
+		heading = Math.atan2(headingVector.getValue(0), headingVector.getValue(1))-5*Math.PI/180;
 	}
 	
 	/**
