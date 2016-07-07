@@ -71,7 +71,7 @@ public class ParticlePosition extends Position{
 	
 	private boolean onGPSChanged = false;
 	
-	private boolean WiFiAssistance = true;
+	private boolean WiFiAssistance = false;
 	
 	private int GPSCredibility = 3;
 	

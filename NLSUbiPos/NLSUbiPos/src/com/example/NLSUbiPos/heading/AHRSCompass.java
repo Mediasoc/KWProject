@@ -66,8 +66,8 @@ public class AHRSCompass extends Compass implements SensorEventListener
 		AHRS_quaternion=new ArrayList<Quaternion>();
 		mag_test=new ArrayList<double []>();
 		timestamps = new long[3];
-		AHRSMode = "6DOF_only";
-//		AHRSMode = "fused";
+//		AHRSMode = "9DOF_only";
+		AHRSMode = "fused";
 	}
 
 
@@ -90,9 +90,9 @@ public class AHRSCompass extends Compass implements SensorEventListener
 				timestamps[0]=event.timestamp;
 
 			} else if (event.sensor.getType() == Sensor.TYPE_ACCELEROMETER) {
-				Accvalues[0]=(float) (values[0]/-9.8);
-				Accvalues[1]=(float) (values[1]/-9.8);
-				Accvalues[2]=(float) (values[2]/-9.8);
+				Accvalues[0]=(float) (values[0]/9.8);
+				Accvalues[1]=(float) (values[1]/9.8);
+				Accvalues[2]=(float) (values[2]/9.8);
 				timestamps[1]=event.timestamp;			
 
 			} else if (event.sensor.getType() == Sensor.TYPE_MAGNETIC_FIELD) {
@@ -110,7 +110,7 @@ public class AHRSCompass extends Compass implements SensorEventListener
 					{
 						threeAngle[c]=AHRS_quaternion.get(AHRS_quaternion.size()-1).quaternConj().quaternion2euler()[c]*180/Math.PI;
 					}
-					mHeading = (float) ((-threeAngle[2]+yawbias)*Math.PI/180);
+					mHeading = (float) ((threeAngle[2]+yawbias)*Math.PI/180);
 					if(counter == Integer.MAX_VALUE){
 						counter = 1000;
 					}
