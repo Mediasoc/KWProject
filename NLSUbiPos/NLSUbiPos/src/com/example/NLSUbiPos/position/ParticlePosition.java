@@ -134,7 +134,8 @@ public class ParticlePosition extends Position{
 				number++;
 				}		
 			}
-			computeCloudAverage();			
+			computeCloudAverage();	
+			savePositionData(System.currentTimeMillis(), positionX, positionY, floor, heading, WiFiList, motionLabel, contextLabel);
 	}
 	
 	public void wifiInitializePosition(List<PositionProb> list, int floor){
@@ -212,7 +213,7 @@ public class ParticlePosition extends Position{
 		computeCloudAverage();
 		computeMeanBias();
 		
-//		savePositionData(event.getTimestamp(), positionX, positionY, floor, heading, WiFiList, motionLabel, contextLabel);
+	savePositionData(event.getTimestamp(), positionX, positionY, floor, heading, WiFiList, motionLabel, contextLabel);
 	}
 
 	@Override
